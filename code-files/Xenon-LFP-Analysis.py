@@ -1137,9 +1137,13 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                                                  style=dict(width='80%',
                                                                                             display='table-cell')), ],
                                                                         style=dict(width='100%', display='table'), ),
+                                                                    html.Br(),
                                                                     html.Div([
                                                                         html.Div([dcc.Graph(id='true', figure=fig0)],className='six columns'),
-                                                                        html.Div([dcc.Graph(id='fft', figure=fig0)],className='six columns'),],className='row'),
+                                                                        html.Div([dcc.Tabs(id='stft',value='fft-plot',children=[
+                                                                            dcc.Tab(label = "Frequency Spectrum (FFT)",value='fft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([dcc.Graph(id='fft', figure=fig0)],)]),
+                                                                            dcc.Tab(label = "Short-time Fourier Transform",value='stft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([dcc.Graph(id='density-figure', figure=fig0)],)])
+                                                                            ],)],className='six columns'),],className='row'),
                                                                     ],
                                                                 style={'text-align': 'center', 'width': '100%',
                                                                        'padding-left': '5%'},
@@ -2175,7 +2179,7 @@ def update_figure(n_clicks, ch_value, value, range_value, toggle, lower, upper, 
 
 
 @app.callback(
-    Output('fft', 'figure'),
+    [Output('fft', 'figure'),Output('density-figure','figure')],
     [Input('button-2','n_clicks'),Input('ch_list', 'value'),Input('true', 'relayoutData'),Input('file_name_text', 'children')],[State('my-toggle-switch', 'value'),State('lower', 'value'),State('upper', 'value'),State('TYPE','value')])
 
 def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
@@ -2184,7 +2188,7 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
     path0 = json.loads(path0['children'])
     ch_id = ch_id
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False or 'xaxis.range[0]' not in selection or 'xaxis.range[1]' not in selection:
-        return fig
+        return fig,fig
     else:
         x0 = selection['xaxis.range[0]']
         x1 = selection['xaxis.range[1]']
@@ -2193,19 +2197,21 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
         parameters = parameter(h5)
         chsList = h5['/3BRecInfo/3BMeaStreams/Raw/Chs'][:]
         tot_chs = parameters['numRecElectrodes']
+        sampling = parameters['samplingRate']
         Frames = int(path0['Frames'])
         ch_x = np.linspace(0, Frames, Frames) / parameters['samplingRate']
         range_lower = np.where(ch_x >= x0)[0]
         range_upper = np.where(ch_x >= x1)[0]
         fig5 = make_subplots(rows=len(ch_id), cols=1, shared_xaxes=True, vertical_spacing=0.06, x_title="Frequency, Hz", y_title="Voltage, (mV)")
-
+        fig6 = make_subplots(rows=len(ch_id), cols=1, shared_xaxes=True, vertical_spacing=0.03, x_title="Time, s",
+                             y_title="Frequency, Hz")
         plot = 0
         if len(ch_id)<2:
             width_plot = 500
         else:
             width_plot = 300
 
-
+        val = True
         for item in ch_id:
             row, column = get_row_col_num(int(item))
             ch_id1 = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
@@ -2221,23 +2227,42 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
                 fig5.add_trace(go.Scatter(x=freq, y=sig_fft, mode='lines', name=label), row=plot+1, col=1)
                 fig5.update_layout(height=len(ch_id) * width_plot, width=1000, title_text="Spectrum")
                 fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', type = 'log',mirror=True, showticklabels=True)
+                fx, tx, Sxx = scipy.signal.spectrogram(sig, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
+                         scaling='density',mode='psd')
+                tt = np.linspace(x0,x1,len(tx))
+                fig6.update_layout(height=len(ch_id) * 300, width=1000, title_text="Spectral Density")
+                fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
+                              zmin=0.00001,zmax=.0005,showscale=val),row=plot+1,col=1)
+                fig6.update_layout(showlegend=False)
+                fig6.update_yaxes(range=[1,50])
             else:
                 CH_Y_f = frequency_filter(CH_Y[range_lower[0]:range_upper[0]],parameters['samplingRate'], type, int(lower), int(upper), order=6)
                 sig_f = CH_Y_f
                 freq_f, sig_fft_f = fft(sig_f, parameters['samplingRate'])
+                fx, tx, Sxx = scipy.signal.spectrogram(sig_f, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
+                         scaling='density',mode='psd')
+                tt = np.linspace(x0,x1,len(tx))
+                fig6.update_layout(height=len(ch_id) * 300, width=1000, title_text="Spectral Density")
+                fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
+                              zmin=0.00001,zmax=.0005,showscale=val),row=plot+1,col=1)
+                fig6.update_layout(showlegend=False)
+                fig6.update_yaxes(range=[1,50])
                 fig5.add_trace(go.Scatter(x=freq, y=sig_fft, mode='lines', name=label), row=plot+1, col=1)
                 fig5.add_trace( go.Scatter(x=freq_f, y=sig_fft_f, mode='lines', name=label + 'filter'),row= plot+1, col=1)
                 fig5.update_layout(height=len(ch_id)*width_plot, width=1000, title_text="Spectrum - Filtered")
                 fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', type = 'log',mirror=True, showticklabels=True)
             plot+=1
+            val = False
 
         fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
         fig5.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
         fig5.update_layout(template="plotly_white", showlegend=True, legend=dict(orientation="h"))
-
+        fig6.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+        fig6.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+        fig6.update_layout(template="plotly_white", showlegend=False,)
         h5.close()
 
-        return fig5
+        return fig5,fig6
 
 @app.callback(
     [Output('filt-g1', 'figure'),Output('table-sz-gp1','data')],
