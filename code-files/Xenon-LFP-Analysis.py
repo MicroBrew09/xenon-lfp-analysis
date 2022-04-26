@@ -1,3 +1,5 @@
+from asyncio import events
+from pickle import TUPLE1
 import dash
 from dash.dependencies import Input, Output, State
 from dash import dcc
@@ -5,7 +7,6 @@ from dash import html
 import plotly.graph_objects as go
 import dash_daq as daq
 from dash import dash_table
-import base64
 from flask_caching import Cache
 import json
 import scipy
@@ -19,11 +20,28 @@ from scipy.signal import find_peaks
 import os
 import scipy.io
 import skimage.measure
-import time
 from datetime import datetime
+import urllib
 import csv
+import re
+import time
+import base64
 
-def parameter(h5):
+
+
+def parameter(h5:object):
+    '''
+    Generates a dictionary to store recording properties from the hdf5 file.
+
+    Args:
+        hdf5 File object in read mode (hdf5 object): 
+            Example: h5 = h5py.File(filepath, 'r')
+
+    Returns:
+        recording properties dict (parameters): A python dict of recording parameters including sampling rate, 
+        total recording frames, list of rows and column numbers of channels, digital to analog voltage conversion parameters. 
+    
+    '''
     parameters = {}
     parameters['nRecFrames'] = h5['/3BRecInfo/3BRecVars/NRecFrames'][0]
     parameters['samplingRate'] = h5['/3BRecInfo/3BRecVars/SamplingRate'][0]
@@ -38,11 +56,37 @@ def parameter(h5):
     parameters['numRecElectrodes'] = len(parameters['recElectrodeList'])
     return parameters
 
-def get_ch_number(x, y):
+def get_ch_number(x:int, y:int):
+    '''
+    Calculate the index number for channel (an integer between 1 to 4096) corresponding to the column number (x) 
+    and row number (y) of the channel display grid. 
+
+    Args:
+        x (int): X axis value from the grid (corresponds to the column label)
+        y (int): Y axis value from the grid (corresponds to the row label)
+
+    Returns:
+        Channel Number from 1 to 4096 (int): 
+            This corresponds to the channel index from the 1 to 4096 channel grid.  
+    
+    '''
     ch_number = x * 64 + y % 64
     return ch_number
 
-def get_row_col_num(ch_number):
+def get_row_col_num(ch_number:int):
+    
+    '''
+    Calculate the corresponding column number (x) 
+    and row number (y) of the channel display grid from the channel index from 1 to 4096. 
+
+    Args:
+        ch_number (int): Channel index from 1 to 4096
+        
+    Returns:
+        row (int): Y axis value from the grid (corresponds to the row label)
+        column (int): X axis value from the grid (corresponds to the column label)  
+    
+    '''
     row = ch_number // 64
     column = ch_number % 64
     if column == 0:
@@ -50,38 +94,128 @@ def get_row_col_num(ch_number):
 
     return row, column
 
-def butter_highpass(cutoff, fs, order=6):
+def butter_highpass(cutoff:np.float32, fs:np.float32, order=6):
+    
+    '''
+    Returns b, a the digital filter co-efficients for a Butterworth filter. 
+
+    Args:
+        cutoff (float): High-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6, 
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+    
+    '''
     nyq = 0.5 * fs
     high = cutoff / nyq
     b, a = scipy.signal.butter(order, high, btype='highpass')
     return b, a
 
-def butter_lowpass(cutoff, fs, order=6):
+def butter_lowpass(cutoff:np.float32, fs:np.float32, order=6):
+    
+    ''' 
+    Returns b, a the digital filter co-efficients for low-pass Butterworth filter. 
+
+    Args:
+        cutoff (float): Low-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6, 
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+    
+    
+    '''
     nyq = 0.5 * fs
     low = cutoff / nyq
     b, a = scipy.signal.butter(order, low, btype='lowpass')
     return b, a
 
-def butter_bandpass(lowcut, highcut, fs, order=6):
+def butter_bandpass(lowcut:np.float32, highcut:np.float32, fs:np.float32, order=6):
+
+    ''' 
+    Returns b, a the digital filter co-efficients for band-pass Butterworth filter. 
+
+    Args:
+        lowcut (float): Low-pass cutoff frequency in Hz.
+        highcut (float): High-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6.
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+
+    '''
+
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
     b, a = scipy.signal.butter(order, [low, high], btype='band')
     return b, a
 
-def cheby_highpass(cutoff, fs, order=6, ripple=2):
+def cheby_highpass(cutoff : np.float32, fs : np.float32, order=6, ripple=2):
+    '''
+    Returns b, a the digital filter co-efficients for a Chebychev filter. 
+
+    Args:
+        cutoff (float): High-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6.
+        ripple (int): Default set to 2.
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+    
+    '''
     nyq = 0.5 * fs
     high = cutoff / nyq
     b, a = scipy.signal.cheby1(order, ripple, high, btype='highpass')
     return b, a
 
-def cheby_lowpass(cutoff, fs, order=6, ripple=2):
+def cheby_lowpass(cutoff:np.float32, fs:np.float32, order=6, ripple=2):
+    ''' 
+    Returns b, a the digital filter co-efficients for low-pass Chebychev filter. 
+
+    Args:
+        cutoff (float): Low-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6.
+        ripple (int): Default set to 2.
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+    
+    
+    '''
     nyq = 0.5 * fs
     low = cutoff / nyq
     b, a = scipy.signal.cheby1(order, ripple, low, btype='lowpass')
     return b, a
 
-def cheby_bandpass(lowcut, highcut, fs, order=6, ripple=2):
+def cheby_bandpass(lowcut:np.float32, highcut:np.float32, fs:np.float32, order=6, ripple=2):
+    ''' 
+    Returns b, a the digital filter co-efficients for band-pass Chebychev filter. 
+
+    Args:
+        lowcut (float): Low-pass cutoff frequency in Hz.
+        highcut (float): High-pass cutoff frequency in Hz.
+        fs (float): Sampling frequency of input data.
+        order (int): Default set to 6.
+        ripple (int): Default set to 2.
+        
+    Returns:
+        b (ndarray): Numerator polynomial
+        a (ndarray): Denominator polynomial
+
+    '''
+
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
@@ -90,15 +224,28 @@ def cheby_bandpass(lowcut, highcut, fs, order=6, ripple=2):
 
 def frequency_filter(signal: np.ndarray, fs: int, type, lowcut: Optional[int], highcut: Optional[int],
                      order=6) -> np.ndarray:
-    """
-    Custom bandpass filter
-    :param signal: single-channel signal
-    :param fs: sampling rate [Hz]
-    :param lowcut: cut everything below this frequency [Hz]
-    :param highcut: cut everything above this frequency [Hz]
-    :param order: order of the Butterworth filter
-    :return: flitered signal (ndarray float32)
-    """
+    ''' 
+    A general purpose digital filter for low-pass, high-pass and band-pass filtering. 
+        Uses the scipy.signal.filtfilt method:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.filtfilt.html?highlight=filt%20filt#scipy.signal.filtfilt
+            Apply a digital filter forward and backward to a signal.
+            This function applies a linear digital filter twice, once forward and once backwards. 
+            The combined filter has zero phase and a filter order twice that of the original.
+
+    Args:
+        signal (numpy array): Input signal as a one-dimensional np.array.
+        fs (int, float): Sampling frequency of input data.
+        type (str): 'BTR' or 'CBY' for Butterworth or Chebychev respectively.
+        lowcut (int, float): Low-pass cutoff frequency in Hz.
+        highcut (int, float): High-pass cutoff frequency in Hz.
+        order (int): Default set to 6.
+        
+        
+    Returns:
+        y (numpy array (float32)): Return the filtered signal with the same shape as the input signal 
+
+    '''
+   
     if lowcut == 0:
         lowcut = None
     if highcut == fs // 2:
@@ -125,7 +272,24 @@ def frequency_filter(signal: np.ndarray, fs: int, type, lowcut: Optional[int], h
     y = scipy.signal.filtfilt(b, a, signal)
     return y
 
-def fft(signal, fs):
+def fft(signal: np.ndarray, fs: np.float32):
+    ''' 
+    A general purpose one sided FFT generated using the scipy.ftt.ftt function. 
+    The frequency resolution is 1 Hz, with a time window equivalent to the length of the signal.  
+
+        Uses the scipy.fft.fft method:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.fft.html#r33a4a1a5944b-1
+
+
+    Args:
+        signal (numpy array): Input signal as a one-dimensional numpy array.
+        fs (int, float): Sampling frequency of input data.
+        
+    Returns:
+        freq (numpy array (float32)): The frequency bin in Hz for the given time window, and sampling frequency.
+        fft (numpy array (float32)): Single side absolute FFT magnitude.  
+
+    '''
     ts = 1 / fs
     n = signal.size
     freq = scipy.fft.fftfreq(n, d=ts)
@@ -134,7 +298,19 @@ def fft(signal, fs):
     return freq[subset], fft_signal[subset]
 
 def create_sensor_grid():
-    grid = np.zeros(shape=(64, 64))
+
+    ''' 
+    HD MEA electrode grid with unit spacing for the 3Brain Biocam-X. 
+    The 3Brain BioCam-X has  64 X 64 electrodes for a total of 4096. The row, column numbers (0,0)
+    at the top left corner, (64,0) at the bottom left corner, (64,0) at the top right corner, and (64,64) at the
+    bottom right corner. 
+
+    Args:
+        None:
+    Returns:
+        Plotly figure with 4096 electrodes rendered as a x, y scatter plot. 
+
+    '''
     x_label = np.linspace(1, 64, 64)
     y_label = np.linspace(1, 64, 64)
     xx, yy = np.meshgrid(x_label, y_label, sparse=False, indexing='xy')
@@ -146,7 +322,19 @@ def create_sensor_grid():
     fig2.update_layout(template="plotly_white", width=600, height=600, legend=dict(orientation="h"))
     return fig2
 
-def get_channel_list(chsList):
+def get_channel_list(chsList:list):
+    
+    ''' 
+    Generate a list of index\ch_numbers for the electrodes in the measurement file using the 
+    row and colum numbers in the electrode list. 
+
+    Args:
+        chsList (dtype=[('Row', '<i2'), ('Col', '<i2')]): List of channels with Row (y axis) and Column (x axis) tuples. 
+    Returns:
+        ch_number ([int]): List of channel numbers.
+
+    '''
+
     column_list = []
     for item in chsList:
         ch_number = get_ch_number(item['Col'], item['Row'])
@@ -154,29 +342,65 @@ def get_channel_list(chsList):
 
     return column_list
 
-def get_reference_index(xx_sig,sampling):
-        ss = 0
-        ee = ss + 60
+def get_reference_index(xx_sig: np.ndarray,sampling:np.float32):
 
-        for i in range(int(len(xx_sig)/sampling)):
-            ss_i =i
-            ee_i = ss_i + 60
-            xmean = np.mean(xx_sig[int(sampling * ss):int(sampling * ee)])
-            xstd = np.std(xx_sig[int(sampling * ss):int(sampling * ee)])
-            xmean_i = np.mean(xx_sig[int(sampling * ss_i):int(sampling * ee_i)])
-            xstd_i = np.std(xx_sig[int(sampling * ss_i):int(sampling * ee_i)])
+    ''' 
+    Scan the first 5 minutes of the recording for a 60 second section that can be used as the reference/baseline recording.
+     The reference section is used to get baseline for seizure detection, 
+     and in some cases to calculate the threshold voltage for peak detection. 
 
-            v = xmean+xstd
-            v_i = xmean_i+xstd_i
+    Args:
+        signal (1d numpy array): The initial section of the voltage recording as a numpy array. 
+        sampling (float): Sampling frequency
+    Returns:
+        start (int): Start Index for the reference
+        end (int): End index for the reference
 
-            if v > v_i:
+    '''
 
-                ss = ss_i
-                ee = ss+60
-                
-        return ss+60, ee+60
+    ss = 0
+    ee = ss + 60
 
-def get_row_column_list(data, chsList, parameters):
+    for i in range(int(len(xx_sig)/sampling)):
+        ss_i =i
+        ee_i = ss_i + 60
+        xmean = np.mean(xx_sig[int(sampling * ss):int(sampling * ee)])
+        xstd = np.std(xx_sig[int(sampling * ss):int(sampling * ee)])
+        xmean_i = np.mean(xx_sig[int(sampling * ss_i):int(sampling * ee_i)])
+        xstd_i = np.std(xx_sig[int(sampling * ss_i):int(sampling * ee_i)])
+
+        v = xmean+xstd
+        v_i = xmean_i+xstd_i
+
+        if v > v_i:
+
+            ss = ss_i
+            ee = ss+60
+            
+    return ss+60, ee+60
+
+
+def get_row_column_list(data: np.ndarray, chsList: list, parameters: dict):
+
+    ''' 
+        Using the first 10 minutes of the recording, 
+        the function uses count of LFP activity peaks in the section 
+        to classify channels with potential electrical noise 
+
+    Args:
+        Data (numpy array): Numpy array of shape (Frames, Number of Channels), data is in the digital values 
+        chslist (dtype=[('Row', '<i2'), ('Col', '<i2')]): List of channels with Row (y axis) and Column (x axis) tuples.
+        parameters (dict): A python dict of recording parameters including sampling rate, 
+        total recording frames, list of rows and column numbers of channels, digital to analog voltage conversion parameters.
+    Returns:
+        y_active ([int]): y axis channel labels for active channels (rows)
+        x_active ([int]): x axis channel labels for active channels (columns)
+        y_noise ([int]): y axis channel labels for potentially noise channels or activity in the first 10 minutes of recording
+        x_noise ([int]): x axis channel labels for potentially noise channels or activity in the first 10 minutes of recording
+        
+
+    '''
+    
     data = convert_to_uV(data, parameters) / 1000000
     sampling = parameters['samplingRate']
     y_active = []
@@ -201,17 +425,72 @@ def get_row_column_list(data, chsList, parameters):
     return y_active, x_active, y_noise, x_noise
 
 def convert_to_uV(data, parameters):
+    """
+    Digital to analog conversion, the hdf5 file stores the raw data as 8 bit digital values, 
+        the digital values are converted to analog voltage values.
+        The conversion factor is stored in the recording parameters file. 
+
+        Args:
+            Data (numpy array): Numpy array of shape (Frames, Number of Channels) 
+            parameters (dict): A python dict of recording parameters including sampling rate, 
+            total recording frames, list of rows and column numbers of channels, digital to analog voltage conversion parameters.
+        Returns:
+            Data (numpy array): Numpy array of shape (Frames, Number of Channels), data is in analog voltage values in mV.
+    
+    """
+    
     ADCCountsToMV, MVOffset = Digital_to_Analog(parameters)
     data = data * ADCCountsToMV + MVOffset
     return data
 
-def Digital_to_Analog(parameters):
+def Digital_to_Analog(parameters: dict):
+    '''
+    Calculate and return the digital to analog conversion factor. 
+
+        Args:
+            parameters (dict): A python dict of recording parameters including sampling rate, 
+            total recording frames, list of rows and column numbers of channels, digital to analog voltage conversion parameters.
+        Returns:
+            ADCCountsToMV (float): Analog to Digital Conversion Count (digital value to mV)
+            MVOffset (float): Voltage offset (mV)  
+    '''
     ADCCountsToMV = parameters['signalInversion'] * parameters['fromQLevelToUVolt']
     MVOffset = parameters['signalInversion'] * parameters['minUVolt']
     return ADCCountsToMV, MVOffset
 
+def peak_raster_grid(data:np.ndarray, column_list:list, parameters:dict,prom: np.float32, wid: np.float32, detect_mode: str, frame_value:list):
 
-def peak_raster_grid(data, column_list, parameters, prom, wid, detect_mode, frame_value):
+    '''
+    Generates the raster plot with LFP activity as a function of time,
+    and summary measures including LFP count, amplitude and duration. 
+
+        Args:
+            data (numpy array): Numpy data array of shape (frames, channels) in mV.
+            column_list ([int]): Channel index values or channel number (range 1 to 4096).  
+            parameters (dict): A python dict of recording parameters including sampling rate, 
+                                total recording frames, list of rows and column numbers of channels, 
+                                digital to analog voltage conversion parameters.
+            prom (float): Fixed minimum threshold voltage in mV for peak detection, 
+                            input received from LFP detection parameters from the GUI front end.
+            wid (float): Mimimum peak detection duration in seconds,
+                            input received from LFP detection parameters from the GUI front end.
+            detect_mode (str): Upward peak only ('SS'), 
+                                or Upward and Downward peaks using absolute value of signal ('DS)
+            frame_value ([float,float]): Time range value from the GUI front end,
+                                    frame_value[0]: start time 
+                                    frame_value[1]: end time
+
+        Returns:
+            figure3: Raster figure as a Plotly scatter plot of LFP activity as a function of time (s)
+            figure9: Summary figure, a Plotly subplot with three rows and one column
+                        The first row is a scatter plot of sum of LFP count at each time point, across the recording length.
+                        The second row is a scatter plot of sum of LFP activity amplitude at each time point, across the recording length.
+                        The third row is a scatter plot of sum of LFP activity duration at each time point, across the recording length.  
+            mean_LFP (float): Mean LFP count for the entire recording
+            mean_Amplitude (float): Mean LFP activity amplitude for the entire recording
+            mean_width (float): Mean LFP activity duration for the entire recording
+    '''
+
     data = convert_to_uV(data, parameters) / 1000000
     df = pd.DataFrame(data, columns=column_list)
     fig3 = go.Figure()
@@ -296,7 +575,15 @@ def peak_raster_grid(data, column_list, parameters, prom, wid, detect_mode, fram
 
     return fig3, fig9, mean_LFP, mean_amplitude, mean_width
 
-def check_filename(path):
+def check_filename(path: str):
+    '''
+    Check the hdf5 file and returns a Boolean (True, False). 
+
+        Args:
+            path (str): Input file path.
+        Returns:
+            Boolean (True or False) 
+    '''
     try:
         h5 = h5py.File(path, 'r')
         parameters = parameter(h5)
@@ -307,7 +594,18 @@ def check_filename(path):
     except:
         return False
 
-def range_slider_marks(min, max, steps):
+def range_slider_marks(min:np.float32, max:np.float32, steps:int):
+
+    '''
+    Uses the minimum, maximum, number of steps to generate the Time Range Dict for the GUI front end. 
+            Args:
+            min (float): Minimum Time value in seconds.
+            max (float): Maximum Time value in seconds.
+            steps (int): Number of time steps  
+        Returns:
+            marks (dict): Time range dict with the tick values for the GUI front end.
+
+    '''
     marks = {}
     steps_array = np.linspace(min, max, steps)
     for i in steps_array:
@@ -317,17 +615,83 @@ def range_slider_marks(min, max, steps):
 
     return marks
 
-def moving_average(x, w):
+def moving_average(x:np.ndarray, w:int):
+    
+    '''
+    Calculates the moving average of time-series data (x) over the specified window length (w), using the np.convolve function. 
+        https://numpy.org/doc/stable/reference/generated/numpy.convolve.html
+
+        Args:
+            signal (1d numpy array): Time series signal (x) in mV of length N
+            window (int): Moving average window length (w)
+        Returns:
+            signal (1d numpy array):  linear convolution of x and an array of ones of length w, output signal of length (N+w-1)
+
+    '''
     return np.convolve(x, np.ones(w), 'full') / w
 
-def psd(x, fs):
+def psd(x:np.ndarray, fs:np.float32):
+
+    '''
+    Calculates the Short Time Frequency Transform, the output spectrum magnitude is scaled using two methods and labeled as power and spec.
+    Power is a one dimensional output which is a square root of the sum of squares of all the frequency bin magnitudes, at each time bin. 
+        The result is an array of length corresponding to the time bins. When ploted it gives the total power as a function of time.
+    Spec is scaled one sided spectrum magnitude as a function of time and frequency bins of shape (frequency bins,time bins). 
+
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.stft.html
+
+        Default Parameters: 
+            One sided, no overlap, hannin window, nperseg = sampling frequency, 
+            Return spectrum manginutdes at 1 Hz resolution and 1 s time bins.
+        Args:
+            signal (1d numpy array): Time series signal (x) in mV of length N
+            fs (float):  Sampling frequency (Hz)
+        Returns:
+            f (float): Frequency bins in Hz
+            t (float): Time bins in Hz
+            power (1D- numpy array): 1D array of length equivalent to the time bins. 
+            spec (2D - numpy array): 2D array of shape (Frequency bins, Time bins), 
+                                    containing the spectrum component magnitudes as a function of time and frequency
+
+    '''
+    
     f, t, Zxx = signal.stft(x, fs, nperseg=fs, noverlap=0, window='hann')
     spec = 2 * abs(Zxx) / (len(x) / fs)
     power = np.sqrt(np.sum(np.power(abs(Zxx), 2), axis=0))
     return f, t, power, spec
 
 
-def get_events_envelope(data, sampling, Frames, detect_mode, smooth1, cutoff1, smooth2, cutoff2,psd_threshold,psd_window):
+def get_events_envelope(data:np.ndarray, sampling:np.float32, Frames:int, detect_mode:str, smooth1:int, 
+cutoff1: np.float32, smooth2:int, cutoff2:np.float32,psd_threshold:np.float32,psd_window:int):
+    '''
+    Returns binary array of events detected in a time series traces using spectrum magnitudes and LFP peaks for an individual electrode/channel. 
+
+    
+        Args:
+            signal (1d numpy array): Time series signal (x) in mV of length N
+            sampling (float):  Sampling frequency (Hz)
+            Frames (int): Number of frames in the recording, time series length
+            detect_mode (str): Peak detection mode single upward peak ('SS') or 
+                                absolute value of channel to detect upward and downward peak ('DS')
+            smooth1 (int): Window length for moving average/convolution
+            cutoff1 (float): Cuttoff value for detecting changes in first derivative of activity peaks as a function of time.
+                                This aids in detecting regions or periods of no activity and continous activity.
+            smooth2 (float): Window length for moving average/convolution.
+            cutoff2 (float): Cutoff value for detecting changes in first derivative of activity peaks as a function of time
+            psd_threshold (float): Power spectral magnitude threshold from baseline signal.
+            psd_window (float): Window for pwer spectral density. 
+        Returns:
+            t ([1d numpy array np.float32]): Time data for events detected using LFP activity peaks.
+            events ([Boolean]): Boolean array 0 indicating periods of no activity and 
+                                            1 indicating periods of activity calculated using LFP activity peaks
+            tt ([1d numpy array np.float32]): Time data for events detected using power spectral magnitude peaks. 
+            events_pp (2D - numpy array): Boolean array 0 indicating periods of no activity and 
+                                            1 indicating periods of activity calculated using power spectral activity
+            peaks_raster ([Boolean]): Boolean array of 0, and 1 indicating LFP activity peaks 
+                                        using variable threshold for each individual channel. 
+
+    '''
+
     x = data
     sig = data.copy()
     xx_sig = sig[int(sampling * 60):int(sampling * 300)]   
@@ -355,6 +719,7 @@ def get_events_envelope(data, sampling, Frames, detect_mode, smooth1, cutoff1, s
     peaks, properties = find_peaks(sig_peak_find, prominence=threshold, width=wid)
     peaks_raster[peaks] = 1
 
+    # Conv-1 for Peak find
     t = np.linspace(0, Frames, Frames) / sampling
     mov_avg = moving_average(abs(np.diff(peaks_raster)), smooth1)
     idx = np.where(mov_avg >= cutoff1)
@@ -376,7 +741,7 @@ def get_events_envelope(data, sampling, Frames, detect_mode, smooth1, cutoff1, s
     events = np.zeros(Frames, dtype=int)
     events[events_id] = 1
 
-    # CONV-2 and connected components
+    # CONV-1 and connected components for Power Spectrum
     mov_avg_pp = moving_average(abs(np.diff(freq_spec[:, 0])), 25)
     idx_pp = np.where(mov_avg_pp >= 0.001)
     index_tt_pp = len(mov_avg_pp) - len(tt)
@@ -391,7 +756,14 @@ def get_events_envelope(data, sampling, Frames, detect_mode, smooth1, cutoff1, s
     return t, events, tt, events_pp[index_tt_pp:], peaks_raster
 
 
-def get_seizures_df(df, idd):
+def get_seizures_df(df:pd.DataFrame, idd:str):
+
+    '''
+    General function to group seizures detected using columns names, identify start and end times.
+
+    df (pd.DataFrame): Dataframe of seizures containing time stamps of seizure like activity. 
+    idd (str): Column name
+    '''
     df_min = df.groupby(by=[idd], as_index=False)['time'].agg(min).rename(columns={idd: idd, 'time': 'start'})
     df_max = df.groupby(by=[idd], as_index=False)['time'].agg(max).rename(columns={idd: idd, 'time': 'end'})
     df_seizures = pd.DataFrame(columns=[idd])
@@ -404,7 +776,11 @@ def get_seizures_df(df, idd):
     return df_seizures
 
 
-def classify_events(X):
+def classify_events(X:np.float32):
+    '''
+    Mapping function to classify seizures based on duration
+
+    '''
     type_dict = {'interictal': 'IC', 'seizure': 'SZ', }
     typ = ''
     if X >= 3 and X <= 10:
@@ -417,7 +793,19 @@ def classify_events(X):
     return typ
 
 
-def combine_events(df_seizures):
+def combine_events(df_seizures: pd.DataFrame):
+    '''
+    General function to group seizure-like events that are closely spaced to form an envelop. 
+    Due to the nature of activity peaks and the time between events, it is required to combine closely spaced events
+    that are probably part of the same seizure. Time between events that are greater than 18 seconds are classified as
+    different events, the number 18 is a parameter that can be optimized based on the users requirement and measurement type.
+
+        Args:
+        df_seizures (pd.DataFrame): Dataframe of channels with seizure like activity, with id, start and end times. 
+
+        Returns:
+        df_events (pd.DataFrame): consolidated DataFrame of seizures in channels with seizure id, start, end times and duration
+    '''
     df_events = pd.DataFrame(columns=['id', 'start', 'end'])
     events_dict = {}
     row_count = 0
@@ -451,8 +839,22 @@ def combine_events(df_seizures):
     df_events['type'] = 'SZ'
     return df_events
 
-
 def detect_seizures(events, events_pp, tt, t):
+
+    '''
+    Using LFP events and events detected using spectral activity to generate a DataFrame of seizures in an individual channel.
+
+        Args:
+            events ([Boolean]): Boolean array 0 indicating periods of no activity and 
+                                            1 indicating periods of activity calculated using LFP activity peaks
+            events_pp (2D - numpy array): Boolean array 0 indicating periods of no activity and 
+                                            1 indicating periods of activity calculated using power spectral activity            
+            tt ([1d numpy array np.float32]): Time data for events detected using power spectral magnitude peaks. 
+            t ([1d numpy array np.float32]): Time data for events detected using LFP activity peaks.
+        Return:
+            df_sz (pd.DataFrame): A dataframe of seizure like activity: id, start, end and duration for individual channel. 
+
+    '''
 
     lfp_peaks = np.zeros((len(events), 3), dtype=int)
     event_label = skimage.measure.label(events, connectivity=1)
@@ -493,17 +895,14 @@ def detect_seizures(events, events_pp, tt, t):
 
     return df_sz
 
-
-def get_psd(x, sampling):
-    if len(x) < 1024:
-        nperseg = len(x)
-    else:
-        nperseg = 1024
-
-    f, pxx = signal.welch(x, sampling, 'hanning', nperseg, scaling='density')
-    return f, pxx
-
 def mean_sampling_frequency(t):
+    '''
+    Returns the sampling frequency from a spike train.
+        Arg:
+            t (list): List of activity peak index
+        Return:
+            msf (np.float32): Return the frequency
+    '''
     n = len(t)
     if n>0:
         t_n = t[-1]
@@ -516,6 +915,15 @@ def mean_sampling_frequency(t):
 
 
 def mean_instantaneous_frequency(t):
+    '''
+    Returns the sampling frequency from a spike train.
+        Arg:
+            t (list): List of activity peak index
+        Return:
+            mean_instantaneous_frequency (np.float32): Mean inter spike/activity frequency from the activity train in Hz
+            mean_inter_spike_interval (np.float32): Mean inter activity interval in seconds. 
+    '''
+
     t_0 = t
     df = pd.DataFrame(t_0, columns=['t0'])
     df['t1'] = df['t0'].shift(1)
@@ -529,6 +937,19 @@ def mean_instantaneous_frequency(t):
     return mean_instantaneous_frequency, mean_inter_spike_interval
 
 def check_false_positive(df_loop,peaks_raster,sampling, Frames):
+    '''
+    The funciton uses a few conditions to check the validity of the seizure, mostly duration, 
+    LFP activity peaks within the start and end of seizure.
+        Arg:
+            df_loop (pd.DataFrame): Dataframe of seizure in channels with seizure id, start time, end time and seizure type.
+            peaks_raster (np.ndarray): List of indices for LFP activity peaks in the channel. 
+            sampling (np.float32): Sampling frequency (Hz) 
+            Frames (int): Number of datapoints in the channel. 
+
+        Return:
+            df_loop (pd.DataFrame): Dataframe of all potential seizures in the channel, with start, end times, LFP activity count. 
+    '''
+
     sz_s = []
     sz_e = []
     sz_num = []
@@ -553,6 +974,20 @@ def check_false_positive(df_loop,peaks_raster,sampling, Frames):
 
 
 def get_ief(peaks_raster, sampling, Frames, starts, ends, sz_num):
+    '''
+    The function uses the LFP activity peaks and returns the number/count of LFP activity within a seizure. 
+        Arg:
+            peaks_raster (np.ndarray): List of indices for LFP activity peaks in the channel. 
+            sampling (np.float32): Sampling frequency (Hz) 
+            Frames (int): Number of datapoints in the channel.
+            starts (list): List of start times for the seizures in a channel.
+            ends (list): List of end times for the seizures in a channel.
+            sz_num (list): List of seizure id 
+
+        Return:
+            ief (dict): Dict of all potential seizures in the channel with its envelop parametes: start, end times, LFP activity count.
+
+    '''
     time = np.arange(0, Frames, 1) / sampling
     ief = []
     for s, e, c in zip(starts, ends, sz_num):
@@ -576,6 +1011,18 @@ def get_ief(peaks_raster, sampling, Frames, starts, ends, sz_num):
 
 
 def get_grid(column_list,row_list, column_20active,row_20active, selected_rows,selected_columns):
+    '''
+    Generates a sensor/electrode grid plot for showing active, and inactive channels. 
+
+    column_list (list): X axis values for channels to be greyed representing all channels in the group
+    row_list (list): Y axis values for channels to be greyed representing all channels in the group
+    column_20active (list): X axis values for channels to be in Red, representing top 20 Active in the group
+    row_20active (list): Y axis values for channels to be in Red, representing top 20 Active in the group
+    selected_rows (list): X axis values for channels (optional)
+    selected_columns (list): Y axis values for channels (optional)
+
+    fig2 (Plotly Scatter Plot): Channel Grid scatter plot
+    '''
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers',
                        name='All Channels'))
@@ -590,197 +1037,123 @@ def get_grid(column_list,row_list, column_20active,row_20active, selected_rows,s
     return fig2
 
 
+fig = go.Figure({"layout": {"xaxis": {"visible": False},"yaxis": {"visible": False}, 
+                "annotations": [{"text": "Select a Channel to View",
+                                "xref": "paper",
+                                "yref": "paper",
+                                "showarrow": False,
+                                "font": {"size": 22}}]
+                }})
 
-fig = go.Figure(
-    {
-        "layout": {
-            "xaxis": {
-                "visible": False
-            },
-            "yaxis": {
-                "visible": False
-            },
-            "annotations": [
-                {
-                    "text": "Select a Channel to View",
-                    "xref": "paper",
-                    "yref": "paper",
-                    "showarrow": False,
-                    "font": {
-                        "size": 22
-                    }
-                }
-            ]
-        }
-    })
+fig5 = go.Figure({"layout": {"xaxis": {"visible": False},"yaxis": {"visible": False}, 
+                "annotations": [{"text": "Select a Time Segment to View FFT",
+                                "xref": "paper",
+                                "yref": "paper",
+                                "showarrow": False,
+                                "font": {"size": 22}}]
+                }})
 
-fig5 = go.Figure(
-    {
-        "layout": {
-            "xaxis": {
-                "visible": False
-            },
-            "yaxis": {
-                "visible": False
-            },
-            "annotations": [
-                {
-                    "text": "Select a Time Segment to View FFT",
-                    "xref": "paper",
-                    "yref": "paper",
-                    "showarrow": False,
-                    "font": {
-                        "size": 22
-                    }
-                }
-            ]
-        }
-    })
+fig6 = go.Figure({"layout": {"xaxis": {"visible": False},"yaxis": {"visible": False}, 
+                "annotations": [{"text": "Updating Raster ...",
+                                "xref": "paper",
+                                "yref": "paper",
+                                "showarrow": False,
+                                "font": {"size": 22}}]
+                }})
 
-fig6 = go.Figure(
-    {
-        "layout": {
-            "xaxis": {
-                "visible": False
-            },
-            "yaxis": {
-                "visible": False
-            },
-            "annotations": [
-                {
-                    "text": "Updating Raster ...",
-                    "xref": "paper",
-                    "yref": "paper",
-                    "showarrow": False,
-                    "font": {
-                        "size": 22
-                    }
-                }
-            ]
-        }
-    })
-fig4 = go.Figure(
-    {
-        "layout": {
-            "xaxis": {
-                "visible": False
-            },
-            "yaxis": {
-                "visible": False
-            },
-            "annotations": [
-                {
-                    "text": "Select Groups & Generate Raster",
-                    "xref": "paper",
-                    "yref": "paper",
-                    "showarrow": False,
-                    "font": {
-                        "size": 22
-                    }
-                }
-            ]
-        }
-    })
+fig4 = go.Figure({"layout": {"xaxis": {"visible": False},"yaxis": {"visible": False}, 
+                "annotations": [{"text": "Select Groups & Generate Raster",
+                                "xref": "paper",
+                                "yref": "paper",
+                                "showarrow": False,
+                                "font": {"size": 22}}]
+                }})
 
-# *** Dash Part ***
+
+''' 
+                        *** Dash Part ***
+This section includes html, and css elements rquired to style the Dash Application
+'''
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
 
 fig0 = fig
 fig2 = create_sensor_grid()
 fig3 = fig
 fig1 = fig6
 fig9 = fig
+tabs_styles = {'height': '44px'}
+tab_style = {'borderBottom': '1px solid #d6d6d6',
+             'padding': '6px',
+             'fontWeight': 'bold'}
 
-tabs_styles = {
-    'height': '44px'
-}
-tab_style = {
-    'borderBottom': '1px solid #d6d6d6',
-    'padding': '6px',
-    'fontWeight': 'bold'
-}
+tab_selected_style = {'borderTop': '1px solid #d6d6d6', 
+                      'borderBottom': '1px solid #d6d6d6', 
+                      'backgroundColor': '#483D8B',
+                      'color': '#F8F8FF', 
+                      'padding': '6px'}
+button_style = {'flex-direction': 'column',
+            'align-items': 'center',
+            'padding': '6px 14px',
+            'font-family': '-apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
+            'border-radius': '6px',
+            'color': '#3D3D3D',
+            'background':'#fff',
+            'border': 'none',
+            'box-shadow': '0px 0.5px 1px rgba(0, 0, 0, 0.1)',
+            'user-select': 'none',
+            'touch-action': 'manipulation',
+            'outline': '0',
+            }
 
-tab_selected_style = {
-    'borderTop': '1px solid #d6d6d6',
-    'borderBottom': '1px solid #d6d6d6',
-    'backgroundColor': '#483D8B',
-    'color': '#F8F8FF',
-    'padding': '6px'
-}
+table_dict0 = [{'File-Path': '', 'File-Name': '', 'Total-Active-Channels': 0, 'Frames': 0, 'Recording-Length': 0, 'Sampling-Rate': 0}, ]
 
-table_dict0 = [{'File-Path': '', 'File-Name': '', 'Total-Active-Channels': 0, 'Frames': 0, 'Recording-Length': 0,
-                'Sampling-Rate': 0}, ]
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-# cache = Cache(app.server, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')})
 server = app.server
 app.config.suppress_callback_exceptions = True
 
-# timeout = 200
-
-app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")],
-                                         style={'text-align': 'center', 'vertical-align': 'bottom',
-                                                'border': 'thin black solid', 'background-color': '#483D8B',
-                                                'color': '#F8F8FF'}),
+app.layout = html.Div(children=[
+                                html.Div([html.H1("XENON LFP Analysis Platform")],
+                                    style={'text-align': 'center', 'vertical-align': 'bottom',
+                                            'border': 'thin black solid', 'background-color': '#483D8B',
+                                            'color': '#F8F8FF'}),
                                 html.Div([
                                     html.Div([html.H6("Input File Path: ")],
-                                             style=dict(width='12%', display='table-cell', padding='2%')),
+                                        style=dict(width='12%', display='table-cell', padding='2%')),
                                     html.Div([dcc.Input(id='File-Name', type='text', size='85', debounce=True,
                                                         placeholder="Analysis File & Path in \'.brw\' format "),
                                               html.Button('Submit', id='submit-file', n_clicks=0)],
-                                             style=dict(width='55%', display='table-cell')),
+                                        style=dict(width='55%', display='table-cell')),
                                     html.Div([html.H6("Select Image File: ")],
-                                             style=dict(width='10%', display='table-cell')),
-                                    html.Div([dcc.Upload(id='upload-image',
-                                                         children=html.Div(
-                                                             ['Drag and Drop or ', html.A('Select File')]),
-                                                         style={'width': '100%', 'height': '100%', 'lineHeight': '60px',
-                                                                'borderWidth': '1px', 'borderStyle': 'dashed',
-                                                                'borderRadius': '5px', 'textAlign': 'center',
-                                                                'margin': '10px'},
-                                                         multiple=False), ],
-                                             style=dict(width='20%', display='table-cell', paddingRight='4%')), ],
+                                        style=dict(width='10%', display='table-cell')),
+                                    html.Div([dcc.Upload(id='upload-image',children=
+                                            html.Div(['Drag and Drop or ', html.A('Select File')]),     
+                                                style={'width': '100%', 'height': '100%', 'lineHeight': '60px','borderWidth': '1px', 'borderStyle': 'dashed',
+                                                        'borderRadius': '5px','textAlign': 'center','margin': '10px'}, multiple=False),],          
+                                        style=dict(width='20%', display='table-cell', paddingRight='4%')), ],        
                                     style=dict(width='100%', display='table'), ),
-                                html.Div([
-                                    dash_table.DataTable(id='table', columns=[
-                                        {'name': 'File Path', 'id': 'File-Path', 'type': 'text'},
-                                        {'name': 'File Name', 'id': 'File-Name', 'type': 'text'},
-                                        {'name': 'Active Channels', 'id': 'Total-Active-Channels', 'type': 'numeric'},
-                                        {'name': 'Data per Channel', 'id': 'Frames', 'type': 'numeric'},
-                                        {'name': 'Recording Time (Seconds)', 'id': 'Recording-Length',
-                                         'type': 'numeric'},
-                                        {'name': 'Sampling (Hz)', 'id': 'Sampling-Rate', 'type': 'numeric'}],
-                                                         data=table_dict0, style_as_list_view=True,
-                                                         style_data={'border': '1px white', 'font_size': '16px',
-                                                                     'text_align': 'center'},
-                                                         style_header={'backgroundColor': 'white',
-                                                                       'border': '1px white', 'font_size': '18px',
-                                                                       'fontWeight': 'bold',
-                                                                       'text-align': 'center'}), ],
+
+                                html.Div([dash_table.DataTable(id='table', columns=[{'name': 'File Path', 'id': 'File-Path', 'type': 'text'},
+                                                                                {'name': 'File Name', 'id': 'File-Name', 'type': 'text'},
+                                                                                {'name': 'Active Channels', 'id': 'Total-Active-Channels', 'type': 'numeric'},
+                                                                                {'name': 'Data per Channel', 'id': 'Frames', 'type': 'numeric'},
+                                                                                {'name': 'Recording Time (Seconds)', 'id': 'Recording-Length','type': 'numeric'},
+                                                                                {'name': 'Sampling (Hz)', 'id': 'Sampling-Rate', 'type': 'numeric'}],
+                                            data=table_dict0, style_as_list_view=True, style_data={'border': '1px white', 'font_size': '16px', 'text_align': 'center'},
+                                        style_header={'backgroundColor': 'white','border': '1px white', 'font_size': '18px','fontWeight': 'bold', 'text-align': 'center'}), ],
                                     style={'width': '100%'}),
                                 html.Div(id='file_name_text', children='Analysis File: ',
-                                         style={'text-align': 'center', 'vertical-align': 'bottom',
-                                                'border': 'thin black solid', 'width': '100%',
-                                                'background-color': '#A52A2A', 'display': 'None'}),
+                                    style={'text-align': 'center', 'vertical-align': 'bottom','border': 'thin black solid', 'width': '100%','background-color': '#A52A2A', 'display': 'None'}),
                                 html.Div(html.P([html.Br()])),
                                 html.Div([
                                     html.Div([html.H6("Select a Time Range for Analysis: ")],
-                                             style={'width': '20%', 'vertical-align': 'middle',
-                                                    'display': 'table-cell'}),
-                                    html.Div([dcc.RangeSlider(id='my-range-slider', min=0, max=20, value=[0, 10],
-                                                              tooltip={'always_visible': True},
-                                                              allowCross=False, dots=False)],
-                                             style={'width': '78%', 'vertical-align': 'middle',
-                                                    'display': 'table-cell'}),
-                                ], style=dict(width='100%', display='table')),
-                                html.Hr(
-                                    style={'width': '10%', 'border-top': '3px dotted black', 'border-radius': '5px'}),
+                                        style={'width': '20%', 'vertical-align': 'middle','display': 'table-cell'}),
+                                    html.Div([dcc.RangeSlider(id='my-range-slider', min=0, max=20, value=[0, 10], tooltip={'always_visible': True},allowCross=False, dots=False)],
+                                        style={'width': '78%', 'vertical-align': 'middle','display': 'table-cell'}),], 
+                                    style=dict(width='100%', display='table')),
+
+                                html.Hr(style={'width': '10%', 'border-top': '3px dotted black', 'border-radius': '5px'}),
                                 html.Div([
                                     html.Div(children=[
                                         html.Div([html.H5('Select Channels for Plots')],
@@ -814,10 +1187,10 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                           html.Div([dcc.Tabs(vertical=False, children=[
                                                               dcc.Tab(label='Plot', style=tab_style,
                                                                       selected_style=tab_selected_style,
-                                                                      children=[dcc.Graph(id='g3', figure=fig1)], ),
+                                                                      children=[html.Button('Raster Plot', id='btn-g3',style = button_style),dcc.Graph(id='g3', figure=fig1)], ),
                                                               dcc.Tab(label='Summary', style=tab_style,
                                                                       selected_style=tab_selected_style,
-                                                                      children=[dcc.Graph(id='g9', figure=fig1),
+                                                                      children=[html.Button('Summary Plot', id='btn-g9',style = button_style),dcc.Graph(id='g9', figure=fig1),
                                                                                 html.Div([
                                                                                     html.Div([daq.LEDDisplay(id='lfp',
                                                                                                              label="LFP/S",
@@ -849,7 +1222,7 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                           html.Div([dcc.Tabs(vertical=False, children=[
                                                               dcc.Tab(label='Plot', style=tab_style,
                                                                       selected_style=tab_selected_style,
-                                                                      children=[dcc.Graph(id='g7', figure=fig3)], ),
+                                                                      children=[html.Button('Group Raster Plot', id='btn-g7',style = button_style),dcc.Graph(id='g7', figure=fig3)], ),
                                                               dcc.Tab(label='Summary', style=tab_style,
                                                                       selected_style=tab_selected_style,
                                                                       children=[
@@ -858,13 +1231,13 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                                      dcc.Tabs(vertical = True, children =[
 
                                                                         dcc.Tab(label='ALL Groups Summary', value = "all_g", style=tab_style, selected_style=tab_selected_style,
-                                                                            children = [dcc.Graph(id='g9_ch', figure=fig9)]),
+                                                                            children = [html.Button('Group Raster Summary', id='btn-g9_ch',style = button_style),dcc.Graph(id='g9_ch', figure=fig3)]),
                                                                         dcc.Tab(label='Group-1 Channels', value = "g1",style=tab_style, selected_style=tab_selected_style,
-                                                                            children = [dcc.Graph(id='g1_GRID', figure=fig9)]),
+                                                                            children = [html.Button('Group1 Channels', id='btn-g1_GRID',style = button_style),dcc.Graph(id='g1_GRID', figure=fig3)]),
                                                                         dcc.Tab(label='Group-2 Channels', value = "g2", style=tab_style, selected_style=tab_selected_style,
-                                                                            children = [dcc.Graph(id='g2_GRID', figure=fig9)]),
+                                                                            children = [html.Button('Group2 Channels', id='btn-g2_GRID',style = button_style),dcc.Graph(id='g2_GRID', figure=fig3)]),
                                                                         dcc.Tab(label='Group-3 Channels', value = "g3", style=tab_style, selected_style=tab_selected_style,
-                                                                            children = [dcc.Graph(id='g3_GRID', figure=fig9)]),
+                                                                            children = [html.Button('Group3 Channels', id='btn-g3_GRID',style = button_style),dcc.Graph(id='g3_GRID', figure=fig3)]),
                                                                         ], value = "all_g", 
                                                                       style={'float': 'left', 'width': '100%'}),
                                                                                 html.Div([
@@ -891,11 +1264,11 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                                                                                  'id': 'LFP-Count20',
                                                                                                                  'type': 'numeric'
                                                                                                              },
-                                                                                                             # {
-                                                                                                             #     'name': 'LFP/s',
-                                                                                                             #     'id': 'LFP-Count-Time',
-                                                                                                             #     'type': 'numeric'
-                                                                                                             # },
+                                                                                                             {
+                                                                                                                 'name': 'Activity-Time-Ratio [Top 20]',
+                                                                                                                 'id': 'atr',
+                                                                                                                 'type': 'numeric'
+                                                                                                             },
                                                                                                              {
                                                                                                                  'name': 'Mean Amplitude [Top 20] (mV)',
                                                                                                                  'id': 'Mean-Amplitude',
@@ -1138,11 +1511,77 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                                                             display='table-cell')), ],
                                                                         style=dict(width='100%', display='table'), ),
                                                                     html.Br(),
+
                                                                     html.Div([
-                                                                        html.Div([dcc.Graph(id='true', figure=fig0)],className='six columns'),
+                                                                        html.Div([html.Button('Time-series Plot', id='btn-true',style = button_style),dcc.Graph(id='true', figure=fig0)],style={'text-align': 'center'},className='six columns'),
                                                                         html.Div([dcc.Tabs(id='stft',value='fft-plot',children=[
-                                                                            dcc.Tab(label = "Frequency Spectrum (FFT)",value='fft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([dcc.Graph(id='fft', figure=fig0)],)]),
-                                                                            dcc.Tab(label = "Short-time Fourier Transform",value='stft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([dcc.Graph(id='density-figure', figure=fig0)],)])
+                                                                            dcc.Tab(label = "Frequency Spectrum (FFT)",value='fft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([html.Br(),html.Button('Spectrum-amplitude Plot', id='btn-fft',style = button_style),dcc.Graph(id='fft', figure=fig0)],style={'text-align': 'center'},)]),
+                                                                            dcc.Tab(label = "Short-time Fourier Transform",value='stft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([html.Br(),html.Button('Power Spectral Density', id='btn-stft',style = button_style),dcc.Graph(id='density-figure', figure=fig0)],style={'text-align': 'center'},),
+                                                                                html.Div(html.A(html.H6("Frequency Bands"),id='download-link3',download="freq-bands.csv",href="",target="_blank")),
+                                                                                html.Div([
+                                                                                              dash_table.DataTable(
+                                                                                                  id='table9',
+                                                                                                  columns=[
+
+                                                                                                    {
+                                                                                                          'name': 'Row',
+                                                                                                          'id': 'row',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                       {
+                                                                                                          'name': 'Column',
+                                                                                                          'id': 'col',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                       {
+                                                                                                          'name': 'Time Window (s)',
+                                                                                                          'id': 'time',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]',
+                                                                                                          'id': 'delta',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'α: 8 to 12Hz [mV^2/Hz]',
+                                                                                                          'id': 'alpha',
+                                                                                                          'type': 'numeric'},
+                                                                                                      {
+                                                                                                          'name': 'β: 12 to 30 Hz [mV^2/Hz]',
+                                                                                                          'id': 'beta',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'γ: above 30 Hz [mV^2/Hz]',
+                                                                                                          'id': 'gamma',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+
+                                                                                                  ],
+                                                                                                  data=[],
+                                                                                                  style_as_list_view=False,
+                                                                                                  style_data={
+                                                                                                      'border': '2px grey',
+                                                                                                      'font_size': '16px',
+                                                                                                      'border': '2px black',
+                                                                                                      'text_align': 'center'},
+                                                                                                  style_cell={
+                                                                                                      'height': 'auto',
+                                                                                                      # all three widths are needed
+                                                                                                      'minWidth': '50px',
+                                                                                                      'width': '100px',
+                                                                                                      'maxWidth': '100px',
+                                                                                                      'whiteSpace': 'normal'
+                                                                                                  },
+                                                                                                  style_header={
+                                                                                                      'backgroundColor': 'white',
+                                                                                                      'border': '2px black',
+                                                                                                      'font_size': '18px',
+                                                                                                      'fontWeight': 'bold',
+                                                                                                      'text-align': 'center'})],
+                                                                                              style=dict(width='100%',
+                                                                                                         display='table')),])
                                                                             ],)],className='six columns'),],className='row'),
                                                                     ],
                                                                 style={'text-align': 'center', 'width': '100%',
@@ -1228,26 +1667,45 @@ app.layout = html.Div(children=[html.Div([html.H1("XENON LFP Analysis Platform")
                                                                                                         display='table-cell')), ],
                                                                                     style=dict(width='100%',
                                                                                                display='table'), ),
-                                                                                html.Div([dcc.Graph(id='filt-g1',
-                                                                                                    figure=fig0),
-                                                                                html.Br(),html.H5("Summary Table of Measures"),
-dash_table.DataTable(id='table-sz-gp1',columns=[
-                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
-                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
-                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
-                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
-                                          data=[],style_as_list_view=True,
-                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
-                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
-                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'}),
-                                                                                ],
-                                                                                         style={'text-align': 'center',
-                                                                                                'width': '100%'}),
 
-                                                                            ], style={'text-align': 'center'},
+                                                                                html.Div([html.Div([html.Br(),html.Button('Seizure Envelop Plot', id='btn-sep',style = button_style)]),
+                                                                                    dcc.Graph(id='filt-g1',figure=fig0),
+                                                                                html.Div(dcc.Tabs(id='stft-ch-gp1',value='time-table',children=[
+                                                                            dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children=[
+                                                                                #html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp1-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-gp1',columns=[
+                                                                                                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
+                                                                                                                          data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),]),]),
+
+                                                                            dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children =[ 
+                                                                                    #                                        html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp1-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-freq-gp1',columns=[
+                                                                                                                            {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                            {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                            {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
+                                                                                                                            {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
+                                                                                                                            {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
+                                                                                                     data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),
+                                                                                ])]),
+                                                                                ]),),], style={'text-align': 'center','width': '100%'}),], style={'text-align': 'center'},
                                                                                 className="six columns"),
 
                                                                             html.Div(
@@ -1281,8 +1739,13 @@ dash_table.DataTable(id='table-sz-gp1',columns=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
                                                                                                           'id': 'sz-rate',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
+                                                                                                          'id': 'tr-SZ-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
 
@@ -1310,7 +1773,7 @@ dash_table.DataTable(id='table-sz-gp1',columns=[
                                                                                               style=dict(width='100%',
                                                                                                          display='table')),
                                                                                           html.Div(html.P([html.Br()])),
-                                                                                          dcc.Graph(id='path-g1',
+                                                                                          html.Button('Seizure Map Group1', id='btn-path-g1',style = button_style),dcc.Graph(id='path-g1',
                                                                                                     figure=fig0)],
                                                                                 style={'text-align': 'center',
                                                                                        'padding-left': '5%'},
@@ -1391,26 +1854,48 @@ dash_table.DataTable(id='table-sz-gp1',columns=[
                                                                                                         display='table-cell')), ],
                                                                                     style=dict(width='100%',
                                                                                                display='table'), ),
-                                                                                html.Div([dcc.Graph(id='filt-g2',
-                                                                                                    figure=fig0),
-                                                                                 html.Br(),html.H5("Summary Table of Measures"),
-dash_table.DataTable(id='table-sz-gp2',columns=[
-                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
-                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
-                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
-                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
-                                          data=[],style_as_list_view=True,
-                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
-                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
-                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'}),],
-                                                                                         style={'text-align': 'center',
-                                                                                                'width': '100%'}),
 
-                                                                            ], style={'text-align': 'center'},
+
+                                                                                html.Div([html.Div([html.Br(),html.Button('Seizure Envelop Plot', id='btn-sep-2',style= button_style)]),
+                                                                                    dcc.Graph(id='filt-g2',figure=fig0),
+                                                                                html.Div(dcc.Tabs(id='stft-ch-gp2',value='time-table',children=[
+                                                                            dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children=[
+                                                                                #html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp2-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-gp2',columns=[
+                                                                                                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
+                                                                                                                          data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),]),]),
+
+                                                                            dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children =[ 
+                                                                                    #                                        html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp2-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-freq-gp2',columns=[
+                                                                                                                            {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                            {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                            {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
+                                                                                                                            {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
+                                                                                                                            {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
+                                                                                                     data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),
+                                                                                ])]),
+                                                                                ]),),], style={'text-align': 'center','width': '100%'}),], style={'text-align': 'center'},
                                                                                 className="six columns"),
+
 
                                                                             html.Div(
                                                                                 children=[html.Div(html.P([html.Br()])),
@@ -1443,8 +1928,13 @@ dash_table.DataTable(id='table-sz-gp2',columns=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
                                                                                                           'id': 'sz-rate',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
+                                                                                                          'id': 'tr-SZ-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
 
@@ -1471,7 +1961,7 @@ dash_table.DataTable(id='table-sz-gp2',columns=[
                                                                                               style=dict(width='100%',
                                                                                                          display='table')),
                                                                                           html.Div(html.P([html.Br()])),
-                                                                                          dcc.Graph(id='path-g2',
+                                                                                          html.Button('Seizure Map Group2', id='btn-path-g2',style = button_style),dcc.Graph(id='path-g2',
                                                                                                     figure=fig0)],
                                                                                 style={'text-align': 'center',
                                                                                        'padding-left': '5%'},
@@ -1551,25 +2041,45 @@ dash_table.DataTable(id='table-sz-gp2',columns=[
                                                                                                         display='table-cell')), ],
                                                                                     style=dict(width='100%',
                                                                                                display='table'), ),
-                                                                                html.Div([dcc.Graph(id='filt-g3',
-                                                                                                    figure=fig0),
-                                                                                 html.Br(),html.H5("Summary Table of Measures"),
-dash_table.DataTable(id='table-sz-gp3',columns=[
-                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
-                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
-                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
-                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
-                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
-                                          data=[],style_as_list_view=True,
-                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
-                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
-                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'}),],
-                                                                                         style={'text-align': 'center',
-                                                                                                'width': '100%'}),
 
-                                                                            ], style={'text-align': 'center'},
+                                                                                html.Div([html.Div([html.Br(),html.Button('Seizure Envelop Plot', id='btn-sep-3',style = button_style)]),
+                                                                                    dcc.Graph(id='filt-g3',figure=fig0),
+                                                                                html.Div(dcc.Tabs(id='stft-ch-gp3',value='time-table',children=[
+                                                                            dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children=[
+                                                                                #html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp3-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-gp3',columns=[
+                                                                                                                          {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                          {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                          {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                          {'name': 'LFP Count','id': 'count','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Spike Frequency (Hz)','id': 'msf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Frequency (Hz)','id': 'm_isf','type': 'numeric'},
+                                                                                                                          {'name': 'Mean Inter Spike Interval (s)','id': 'mean_isi','type': 'numeric'},],
+                                                                                                                          data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),]),]),
+
+                                                                            dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
+                                                                                html.Div(children =[ 
+                                                                                    #                                        html.Br(),html.H5("Summary Table of Measures"),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp3-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(dash_table.DataTable(id='table-sz-freq-gp3',columns=[
+                                                                                                                            {'name': 'sz #','id': 'sz_num','type': 'numeric'},
+                                                                                                                            {'name': 'start (s)','id': 'start','type': 'numeric'},
+                                                                                                                            {'name': 'end (s)','id': 'end', 'type': 'numeric'},
+                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
+                                                                                                                            {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
+                                                                                                                            {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
+                                                                                                     data=[],style_as_list_view=True,
+                                                                                                     style_data={'border': '1px white','font_size': '14px','text_align': 'center'},
+                                                                                                     style_cell={'height': 'auto','minWidth': '50px','width': '100px','maxWidth': '100px','whiteSpace': 'normal'},
+                                                                                                     style_header={'backgroundColor': 'white','border': '1px white','font_size': '14px','fontWeight': 'bold','text-align': 'center'})),
+                                                                                ])]),
+                                                                                ]),),], style={'text-align': 'center','width': '100%'}),], style={'text-align': 'center'},
                                                                                 className="six columns"),
 
                                                                             html.Div(
@@ -1603,8 +2113,13 @@ dash_table.DataTable(id='table-sz-gp3',columns=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
                                                                                                           'id': 'sz-rate',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
+                                                                                                          'id': 'tr-SZ-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
 
@@ -1632,7 +2147,7 @@ dash_table.DataTable(id='table-sz-gp3',columns=[
                                                                                               style=dict(width='100%',
                                                                                                          display='table')),
                                                                                           html.Div(html.P([html.Br()])),
-                                                                                          dcc.Graph(id='path-g3',
+                                                                                          html.Button('Seizure Map Group3', id='btn-path-g3',style = button_style),dcc.Graph(id='path-g3',
                                                                                                     figure=fig0)],
                                                                                 style={'text-align': 'center',
                                                                                        'padding-left': '5%'},
@@ -1665,9 +2180,6 @@ def update_grid(n_clicks, img, value, img_file):
         chsList = parameters['recElectrodeList']
         Frames = parameters['nRecFrames']
         data = np.array(h5['/3BData/Raw']).reshape(Frames, len(chsList))
-        x_label = np.linspace(1, 64, 64)
-        y_label = np.linspace(1, 64, 64)
-        xx, yy = np.meshgrid(x_label, y_label, sparse=False, indexing='xy')
         row_list, column_list, row_list_noise, column_list_noise = get_row_column_list(data, chsList, parameters)
         range_min = 0
         range_max = (parameters['nRecFrames'] / parameters['samplingRate']) - 10
@@ -1698,12 +2210,12 @@ def update_grid(n_clicks, img, value, img_file):
         fig2.update_layout(images=[dict(source=img,xref="paper",yref="paper",x=0,y=1,sizex=1,sizey=1,sizing="stretch",opacity=0.5,layer="above")],)
         fig2.update_layout(template="plotly_white", showlegend=True, clickmode='event+select', width=600, height=600,legend=dict(orientation="h"))
 
-        output = file_path + '\\results-' + file_name.split('.')[0]
+        output = file_path +'\\results-' + file_name.split('.')[0]+'\\'
 
         if not os.path.exists(output):
             os.makedirs(output)
 
-        csv_file_name = output + '\\' + 'group_summary_log.csv'
+        csv_file_name = output + 'group_summary_log.csv'
         
         if not os.path.exists(csv_file_name):
             df_groups = pd.DataFrame(columns=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel',
@@ -1740,12 +2252,13 @@ def update_grid(n_clicks, img, value, img_file):
 
 @app.callback(
     [Output('g3', 'figure'), Output('g9', 'figure'), Output('lfp', 'value'), Output('amplitude', 'value'),Output('duration', 'value')],
-    [Input('button-2', 'n_clicks'), Input('file_name_text', 'children')],
+    [Input('button-2', 'n_clicks'), Input('file_name_text', 'children'),Input('btn-g3','n_clicks'),Input('btn-g9','n_clicks')],
     [State('my-range-slider', 'value'), State('prominence', 'value'), State('width', 'value'),State('detect_mode', 'value')])
-def update_peak_raster(n_clicks1, value, range_value, prom, wid, detect_mode):
+def update_peak_raster(n_clicks1, value, btn_g3, btn_g9, range_value, prom, wid, detect_mode):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     if 'Filename' in path0.keys() and check_filename(path0['Filename']) == True:
+        ctx = dash.callback_context
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
         parameters = parameter(h5)
@@ -1769,7 +2282,12 @@ def update_peak_raster(n_clicks1, value, range_value, prom, wid, detect_mode):
                  path0['Filename'].split('\\')[-1].split('.')[0]
         if not os.path.exists(output):
             os.makedirs(output)
+       
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3":
+            fig3.write_image(output+"\\all_channel_raster"+"_"+str(btn_g3)+".pdf")
 
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9":
+            fig9.write_image(output+"\\all_channel_summary"+"_"+str(btn_g9)+".pdf")
 
         return fig3, fig9, round(mean_LFP, 4), round(mean_amplitude, 4), round(mean_width, 4)
 
@@ -1779,20 +2297,20 @@ def update_peak_raster(n_clicks1, value, range_value, prom, wid, detect_mode):
 
 @app.callback(
     [Output('g7', 'figure'), Output('g9_ch', 'figure'), Output('table2', 'data'), Output('g1_GRID','figure'),Output('g2_GRID','figure'),Output('g3_GRID','figure')],
-    [Input('button-3', 'n_clicks'), Input('file_name_text', 'children')],
+    [Input('button-3', 'n_clicks'), Input('file_name_text', 'children'),Input('btn-g7','n_clicks'),Input('btn-g9_ch','n_clicks'),Input('btn-g1_GRID','n_clicks'),Input('btn-g2_GRID','n_clicks'),Input('btn-g3_GRID','n_clicks')],
     [State('my-range-slider', 'value'), State('my-toggle-switch_ras', 'value'), State('lower_ras', 'value'),
      State('upper_ras', 'value'),
      State('TYPE_ras', 'value'), State('prominence_ras', 'value'), State('width_ras', 'value'),
      State('detect_mode_ras', 'value'),
      State('group1', 'value'), State('group2', 'value'), State('group3', 'value')])
-def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, type, prom, wid, detect_mode, group_1,group_2, group_3):
+def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2Grid, btn_g3Grid, range_value, toggle, lower, upper, type, prom, wid, detect_mode, group_1,group_2, group_3):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ctx = dash.callback_context
     trigger = ctx.triggered
-    button = trigger[0]['prop_id']
-
-    if 'Filename' in path0.keys() and check_filename(path0['Filename']) == True and button == 'button-3.n_clicks':
+    button = trigger[0]['prop_id'].split('.')[0]
+    
+    if 'Filename' in path0.keys() and check_filename(path0['Filename']) == True and button in ['button-3','btn-g7','btn-g9_ch','btn-g1_GRID','btn-g2_GRID','btn-g3_GRID']:
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
         parameters = parameter(h5)
@@ -1830,14 +2348,15 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
         rows = []
         columns = []
         group_num = []
+        atr_ch = []
         lfp_count_ch = []
         avg_amplitude_ch = []
         avg_duration_ch = []
         time_to_event = []
 
-        df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number', 'lfp_count', 
+        df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number', 'atr-ch','lfp_count', 
                                             'avg_amplitude', 'avg_duration','time_to_event'])
-        df_groups = pd.DataFrame(columns=['Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel', 'LFP-Count20',
+        df_groups = pd.DataFrame(columns=['Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel', 'atr','LFP-Count20',
                                             'LFP-Count-CH', 'LFP-Count-Time','Mean-Amplitude', 'Mean-Duration'])
         df_groups['Group'] = [1, 2, 3]
 
@@ -1866,6 +2385,8 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
                     else:
                         sig = sig
                     peaks, properties = find_peaks(sig, prominence=float(prom), width=interval)
+                    chPeakWidth = scipy.signal.peak_widths(sig, peaks, rel_height=1)
+                    chPeakWidth_ratio = np.sum(chPeakWidth[0])/parameters['samplingRate']/(np.max(x)-np.min(x))
                     spikes = np.arange(0, parameters['nRecFrames'], 1)[peaks]
                     channel_list.append(ch)
                     rows.append(row)
@@ -1887,14 +2408,16 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
                     lfp_count_ch.append(np.sum(lfp_sub))
                     avg_amplitude_ch.append(np.mean(pp_prominence_sub[peaks]))
                     avg_duration_ch.append(np.mean(pp_width_sub[peaks]))
-
+                    atr_ch.append(chPeakWidth_ratio)
                     label1 = '(' + str(column) + ', ' + str(row) + ')'
                     label = "CH-" + label1
                     spikes_label = [label for _ in spikes]
                     fig7.add_trace(go.Scatter(x=x[peaks], y=spikes_label, mode='markers', marker_size=2, marker_color=color[i],
                                                 name=label, legendgroup="Group " + str(i + 1)))
-                    fig7.update_layout(template="plotly_white", showlegend=True, width=600, height=600)
+                    fig7.update_layout(template="plotly_white", showlegend=False, width=600, height=600)
                     count += 1
+                    
+                    
             else:
                 pass
 
@@ -1904,15 +2427,22 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
             os.makedirs(output)
         csv_file_name = output + '\\' + 'summary_all.csv'
 
+        fig7.update_xaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,title_text='Time, Seconds')
+        fig7.update_yaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,showticklabels=False,title_text="Channels")
+        fig_group_raster = go.Figure(fig7)
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g7":
+            fig_group_raster.write_image(output+"\\group_channel_raster"+"_"+str(btn_g7)+".pdf")
+
         df_channel['ch_num'] = channel_list
         df_channel['row_num'] = rows
         df_channel['column_num'] = columns
         df_channel['group_number'] = group_num
+        df_channel['atr-ch'] = atr_ch
         df_channel['lfp_count'] = lfp_count_ch
         df_channel['avg_amplitude'] = avg_amplitude_ch
         df_channel['avg_duration'] = avg_duration_ch
         df_channel['time_to_event'] = time_to_event
-        csv_file_name = output + '' + 'summary_all.csv'
         df_channel.to_csv(csv_file_name, header=True, index=False)
 
         tot_channel_0 = len(df_channel[df_channel['group_number'] == 0])
@@ -1974,6 +2504,9 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
         df_groups['Mean-Amplitude'].loc[0] = round(np.mean(np.array(df_channel_0['avg_amplitude'])[0:20]), 3)
         df_groups['Mean-Amplitude'].loc[1] = round(np.mean(np.array(df_channel_1['avg_amplitude'])[0:20]), 3)
         df_groups['Mean-Amplitude'].loc[2] = round(np.mean(np.array(df_channel_2['avg_amplitude'])[0:20]), 3)
+        df_groups['atr'].loc[0] = round(np.mean(np.array(df_channel_0['atr-ch'])[0:20]), 3)
+        df_groups['atr'].loc[1] = round(np.mean(np.array(df_channel_1['atr-ch'])[0:20]), 3)
+        df_groups['atr'].loc[2] = round(np.mean(np.array(df_channel_2['atr-ch'])[0:20]), 3)
         df_groups['Mean-Duration'].loc[0] = round(np.mean(np.array(df_channel_0['avg_duration'])[0:20]), 3)
         df_groups['Mean-Duration'].loc[1] = round(np.mean(np.array(df_channel_1['avg_duration'])[0:20]), 3)
         df_groups['Mean-Duration'].loc[2] = round(np.mean(np.array(df_channel_2['avg_duration'])[0:20]), 3)
@@ -2005,13 +2538,25 @@ def update_channel_raster(n_clicks2, value, range_value, toggle, lower, upper, t
         df_save = df_channel_0
         df_save = df_save.append(df_channel_1)
         df_save = df_save.append(df_channel_2)
-        file_path_output = output + '\\' + "data_channels.mat"
         csv_file_name = output + '\\' + 'summary.csv'
         df_save.to_csv(csv_file_name, header=True, index=False)
 
-        fig7.update_xaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,title_text='Time, Seconds')
-        fig7.update_yaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True)
+        
         h5.close()
+
+        
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9_ch":
+            fig10.write_image(output+"\\group_summary"+"_"+str(btn_g9_ch)+".pdf")
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g1_GRID":
+            g1_GRID.write_image(output+"\\group1_grid"+"_"+str(btn_g1Grid)+".pdf")
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g2_GRID":
+            g2_GRID.write_image(output+"\\group2_grid"+"_"+str(btn_g2Grid)+".pdf")
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3_GRID":
+            g3_GRID.write_image(output+"\\group3_grid"+"_"+str(btn_g3Grid)+".pdf")
 
         return fig7, fig10, summary_dict, g1_GRID, g2_GRID, g3_GRID
 
@@ -2091,16 +2636,18 @@ def display_chs_raster_group(selectedData1, selectedData2, selectedData3):
 @app.callback(
     Output('true', 'figure'),
     [Input('button-2', 'n_clicks'), Input('ch_list', 'value'), Input('file_name_text', 'children'),
-     Input('my-range-slider-2', 'value')],
+     Input('my-range-slider-2', 'value'),Input('btn-true','n_clicks')],
     [State('my-toggle-switch', 'value'), State('lower', 'value'), State('upper', 'value'),
-     State('TYPE', 'value'), State('prominence', 'value'), State('width', 'value'), State('detect_mode', 'value')])
-def update_figure(n_clicks, ch_value, value, range_value, toggle, lower, upper, type, prom, wid, detect_mode):
+     State('TYPE', 'value'), State('prominence', 'value'), State('width', 'value'), State('detect_mode', 'value'),State('true','relayoutData')])
+def update_figure(n_clicks, ch_value, value, range_value,btn_true, toggle, lower, upper, type, prom, wid, detect_mode,selection):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ch_id = ch_value
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False:
         return fig
     else:
+        ctx = dash.callback_context
+
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
         parameters = parameter(h5)
@@ -2146,11 +2693,11 @@ def update_figure(n_clicks, ch_value, value, range_value, toggle, lower, upper, 
                 if toggle == False:
                     fig2.add_trace(go.Scatter(x=ch_x, y=CH_Y, mode='lines', name=label), row=plot + 1, col=1)
                     fig2.add_trace(go.Scattergl(x=time_axis, y=pp, mode='markers', name=label, marker_size=20, marker_symbol='line-ns-open'), row=plot + 1, col=1)
-                    fig2.update_layout(height=len(channels) * width_plot, width=1000, title_text="True")
+                    fig2.update_layout(height=len(channels) * width_plot, width=1000,)
                     fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True, showticklabels=True)
                 else:
                     CH_Y_f = frequency_filter(CH_Y, parameters['samplingRate'], type, int(lower), int(upper), order=6)
-                    fig2.update_layout(height=len(channels) * width_plot, width=1000, title_text="Filtered")
+                    fig2.update_layout(height=len(channels) * width_plot, width=1000,)
                     fig2.add_trace(go.Scatter(x=ch_x, y=CH_Y, mode='lines', name=label), row=plot + 1, col=1)
                     fig2.add_trace(go.Scattergl(x=time_axis, y=pp, mode='markers', name=label, marker_size=20, marker_symbol='line-ns-open'), row=plot + 1, col=1)
                     fig2.add_trace(go.Scatter(x=ch_x, y=CH_Y_f, mode='lines', name=label + 'filter'), row=plot + 1, col=1)
@@ -2169,9 +2716,22 @@ def update_figure(n_clicks, ch_value, value, range_value, toggle, lower, upper, 
                 fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
                 fig2.update_layout(template="plotly_white", showlegend=True, legend=dict(orientation="h"))
                 plot += 1
+            h5.close()
+            output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+                 path0['Filename'].split('\\')[-1].split('.')[0]
+            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-true":
+
+                if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+                    fig2.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+
+                if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+                    fig2.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+                
+                fig2.write_image(output+"\\time_series_chs"+str(len(channels))+"_"+str(btn_true)+".pdf")
+                
 
  
-            h5.close()
+            
             return fig2
 
         else:
@@ -2179,17 +2739,20 @@ def update_figure(n_clicks, ch_value, value, range_value, toggle, lower, upper, 
 
 
 @app.callback(
-    [Output('fft', 'figure'),Output('density-figure','figure')],
-    [Input('button-2','n_clicks'),Input('ch_list', 'value'),Input('true', 'relayoutData'),Input('file_name_text', 'children')],[State('my-toggle-switch', 'value'),State('lower', 'value'),State('upper', 'value'),State('TYPE','value')])
+    [Output('fft', 'figure'),Output('density-figure','figure'),Output('table9','data'),Output('download-link3', 'href')],
+    [Input('button-2','n_clicks'),Input('ch_list', 'value'),Input('true', 'relayoutData'),Input('file_name_text', 'children'),Input('btn-fft','n_clicks'),Input('btn-stft','n_clicks')],
+    [State('my-toggle-switch', 'value'),State('lower', 'value'),State('upper', 'value'),State('TYPE','value'),State('fft','relayoutData'),State('density-figure','relayoutData')])
 
-def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
+def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,upper,type,selection2,selection3):
 
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ch_id = ch_id
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False or 'xaxis.range[0]' not in selection or 'xaxis.range[1]' not in selection:
-        return fig,fig
+        return fig,fig,[],""
     else:
+        ctx = dash.callback_context
+
         x0 = selection['xaxis.range[0]']
         x1 = selection['xaxis.range[1]']
         path = path0['Filename']
@@ -2211,6 +2774,15 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
         else:
             width_plot = 300
 
+        dfPower = pd.DataFrame(columns=['row','col','time','delta', 'alpha', 'beta', 'gamma'])
+        delta = []
+        alpha = []
+        beta = []
+        gamma = []
+        Row = []
+        Col = []
+        time = []
+
         val = True
         for item in ch_id:
             row, column = get_row_col_num(int(item))
@@ -2225,35 +2797,69 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
             label = ('(' + str(row) + ',' + str(column) + ')')
             if toggle == False:
                 fig5.add_trace(go.Scatter(x=freq, y=sig_fft, mode='lines', name=label), row=plot+1, col=1)
-                fig5.update_layout(height=len(ch_id) * width_plot, width=1000, title_text="Spectrum")
+                fig5.update_layout(height=len(ch_id) * width_plot, width=1000)
                 fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', type = 'log',mirror=True, showticklabels=True)
                 fx, tx, Sxx = scipy.signal.spectrogram(sig, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
+                chDelta = np.sum(Sxx[0:9],axis=0)
+                chAlpha = np.sum(Sxx[9:13],axis=0)
+                chBeta = np.sum(Sxx[13:31],axis=0)
+                chGamma = np.sum(Sxx[31:],axis=0)
+                delta.append(np.round(np.sum(chDelta),5))
+                alpha.append(np.round(np.sum(chAlpha),5))
+                beta.append(np.round(np.sum(chBeta),5))
+                gamma.append(np.round(np.sum(chGamma),5))
+
                 tt = np.linspace(x0,x1,len(tx))
-                fig6.update_layout(height=len(ch_id) * 300, width=1000, title_text="Spectral Density")
+                Row.append(row)
+                Col.append(column)
+                time.append(np.round((max(tt)-min(tt)),2))
+                fig6.update_layout(height=len(ch_id) * 300, width=1000)
                 fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
-                              zmin=0.00001,zmax=.0005,showscale=val),row=plot+1,col=1)
+                              zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
                 fig6.update_layout(showlegend=False)
-                fig6.update_yaxes(range=[1,50])
+                #fig6.update_yaxes(range=[1,50])
             else:
                 CH_Y_f = frequency_filter(CH_Y[range_lower[0]:range_upper[0]],parameters['samplingRate'], type, int(lower), int(upper), order=6)
                 sig_f = CH_Y_f
                 freq_f, sig_fft_f = fft(sig_f, parameters['samplingRate'])
                 fx, tx, Sxx = scipy.signal.spectrogram(sig_f, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
+                chDelta = np.sum(Sxx[0:9],axis=0)
+                chAlpha = np.sum(Sxx[9:13],axis=0)
+                chBeta = np.sum(Sxx[13:31],axis=0)
+                chGamma = np.sum(Sxx[31:],axis=0)
+                delta.append(np.round(np.sum(chDelta),5))
+                alpha.append(np.round(np.sum(chAlpha),5))
+                beta.append(np.round(np.sum(chBeta),5))
+                gamma.append(np.round(np.sum(chGamma),5))
+
                 tt = np.linspace(x0,x1,len(tx))
-                fig6.update_layout(height=len(ch_id) * 300, width=1000, title_text="Spectral Density")
+                Row.append(row)
+                Col.append(column)
+                time.append(np.round((max(tt)-min(tt)),2))
+                fig6.update_layout(height=len(ch_id) * 300, width=1000)
                 fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
-                              zmin=0.00001,zmax=.0005,showscale=val),row=plot+1,col=1)
+                              zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
                 fig6.update_layout(showlegend=False)
-                fig6.update_yaxes(range=[1,50])
                 fig5.add_trace(go.Scatter(x=freq, y=sig_fft, mode='lines', name=label), row=plot+1, col=1)
                 fig5.add_trace( go.Scatter(x=freq_f, y=sig_fft_f, mode='lines', name=label + 'filter'),row= plot+1, col=1)
-                fig5.update_layout(height=len(ch_id)*width_plot, width=1000, title_text="Spectrum - Filtered")
+                fig5.update_layout(height=len(ch_id)*width_plot, width=1000,)
                 fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', type = 'log',mirror=True, showticklabels=True)
             plot+=1
             val = False
 
+        dfPower['delta'] = delta
+        dfPower['alpha'] = alpha
+        dfPower['beta'] = beta
+        dfPower['gamma'] = gamma
+        dfPower['row'] = Row
+        dfPower['col'] = Col
+        dfPower['time'] = time
+
+        table9 = dfPower.to_dict("records")
+        output_string = dfPower.to_csv(index=False, encoding='utf-8')
+        output_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string)
         fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
         fig5.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
         fig5.update_layout(template="plotly_white", showlegend=True, legend=dict(orientation="h"))
@@ -2262,20 +2868,39 @@ def update_fft(n_clicks,ch_id,selection,value,toggle,lower,upper,type):
         fig6.update_layout(template="plotly_white", showlegend=False,)
         h5.close()
 
-        return fig5,fig6
+        
+        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+                 path0['Filename'].split('\\')[-1].split('.')[0]
+        
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-fft":
+            if 'xaxis.range[0]' in selection2 and 'xaxis.range[1]' in selection2:
+                fig5.update_xaxes(range = [selection2['xaxis.range[0]'],selection2['xaxis.range[1]']])
+
+            if 'yaxis.range[0]' in selection2 and 'yaxis.range[1]' in selection2:
+                fig5.update_yaxes(range = [selection2['yaxis.range[0]'],selection2['yaxis.range[1]']])
+                
+            fig5.write_image(output+"\\fft_magnitude_chs"+str(len(ch_id))+"_"+str(btn_fft)+".pdf")
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-stft":     
+            fig6.write_image(output+"\\spectral_heatmap_chs"+str(len(ch_id))+"_"+str(btn_stft)+".pdf")
+
+
+        return fig5,fig6,table9,output_string
 
 @app.callback(
-    [Output('filt-g1', 'figure'),Output('table-sz-gp1','data')],
+    [Output('filt-g1', 'figure'),Output('table-sz-gp1','data'),Output('table-sz-freq-gp1','data'),Output('gp1-table-link1','href'),Output('gp1-table-link2','href')],
     [Input('ch_list-sz-g1', 'value'), Input('file_name_text', 'children'), Input('window1-g1', 'value'),
      Input('cutoff1-g1', 'value'), Input('window2-g1', 'value'), Input('cutoff2-g1', 'value'),
-     Input('detect_mode', 'value')])
-def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('detect_mode', 'value'),Input('btn-sep','n_clicks')],State('filt-g1', 'relayoutData'))
+def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_sep, selection):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ch_id = ch_num
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False:
-        return fig0, []
+        return fig0, [], [],"",""
     else:
+        ctx = dash.callback_context
+
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
         parameters = parameter(h5)
@@ -2289,7 +2914,9 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         x = data[:, ch_id]
         x = convert_to_uV(x, parameters) / 1000000
         x = x - np.mean(x)
+        sig = x.copy()
         x = frequency_filter(x, sampling, "BTR", int(0), int(15), order=6)
+
         t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1),float(cutoff1), int(smooth2), float(cutoff2),0.018,25)
         df_loop = detect_seizures(events, events_pp, tt, t)
         df_loop = check_false_positive(df_loop, peaks_raster,sampling, Frames)
@@ -2302,41 +2929,101 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         starts = []
         ends = []
         sz_nm = []
+        delta = []
+        alpha = []
+        beta = []
+        gamma = []
+        sz_num = []
         count = 0
+        dfPower = pd.DataFrame(columns=['sz_num','start','end','delta', 'alpha', 'beta', 'gamma'])
+
         for i in df_loop.index:
+
             if df_loop.loc[i, 'type'] != 'NS' and (~np.isnan(df_loop.loc[i,'start'])):
+
+                
+                
 
                 s = df_loop.loc[i, 'start']
                 e = df_loop.loc[i, 'end']
+                s_idx = int(s*sampling)
+                e_idx = int(e*sampling)
+                fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
+                         scaling='density',mode='psd')
+                chDelta = np.sum(Sxx[0:9],axis=0)
+                chAlpha = np.sum(Sxx[9:13],axis=0)
+                chBeta = np.sum(Sxx[13:31],axis=0)
+                chGamma = np.sum(Sxx[31:],axis=0)
+                delta.append(np.round(np.sum(chDelta),5))
+                alpha.append(np.round(np.sum(chAlpha),5))
+                beta.append(np.round(np.sum(chBeta),5))
+                gamma.append(np.round(np.sum(chGamma),5))
+
                 starts.append(s)
                 ends.append(e)
                 sz_nm.append(count)
                 num = count+1
+                sz_num.append(num)
                 text = df_loop.loc[i, 'type']
                 env[s:e] = 1
                 annot_time.append((s + e) / 2)
                 annot_value.append(1)
                 annot_text.append(text[0]+"("+str(num)+")")
                 count+=1
+        
+        dfPower['delta'] = delta
+        dfPower['alpha'] = alpha
+        dfPower['beta'] = beta
+        dfPower['gamma'] = gamma
+        dfPower['sz_num'] = sz_num
+        dfPower['start'] = starts
+        dfPower['end'] = ends
+        table9 = dfPower.to_dict("records")
 
-        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)       
+        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)  
+        DF_IEF = pd.DataFrame.from_records(df_IEF)
+
         fig3 = go.Figure(data=go.Scatter(x=t[10000:], y=x[10000:], marker_color="green", name='Time Trace'))
         fig3.add_trace(go.Scatter(x=env_time, y=env, mode='lines', name='envelop'))
         fig3.add_trace(go.Scatter(x=annot_time, y=annot_value, mode='markers+text', text=annot_text, textposition="top center", name='events'))
         fig3.update_xaxes(showline=True, linewidth=1, title='Time, seconds', linecolor='black', mirror=True)
-        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, microVolts', linecolor='black', mirror=True)
+        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, mV', linecolor='black', mirror=True)
         fig3.update_layout(template="plotly_white", showlegend=True, height=800, width=1000, legend=dict(orientation="h"))
+        
+
         h5.close()
 
-        return fig3, df_IEF
+        output_string1 = DF_IEF.to_csv(index=False, encoding='utf-8')
+        output_string1 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string1)
+
+        output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
+        output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
+
+        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+                 path0['Filename'].split('\\')[-1].split('.')[0]
+        
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep":
+            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+
+            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+                
+            fig3.write_image(output+"\\seizure_envelop_g1_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+
+        
+            
+
+        return fig3, df_IEF,table9,output_string1,output_string2
 
 
 @app.callback(
     [Output('path-g1', 'figure'), Output('table4', 'data')],
     [Input('sz-analysis', 'value'), Input('g2_g1', 'selectedData'), Input('file_name_text', 'children'),
      Input('g7', 'relayoutData'), Input('window1-g1', 'value'), Input('cutoff1-g1', 'value'),
-     Input('window2-g1', 'value'), Input('cutoff2-g1', 'value'), Input('detect_mode', 'value')])
-def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('window2-g1', 'value'), Input('cutoff2-g1', 'value'), Input('detect_mode', 'value'),Input('btn-path-g1','n_clicks')])
+def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_path_g1):
     points = selectedData
     path0 = value['props']
     path0 = json.loads(path0['children'])
@@ -2345,6 +3032,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             default = []
             return fig0, []
         else:
+            ctx = dash.callback_context
             x0 = selection['xaxis.range[0]']
             x1 = selection['xaxis.range[1]']
             path = path0['Filename']
@@ -2451,8 +3139,21 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             df_rank_sz['duration'] = df_rank_sz['end'] - df_rank_sz['start']
             df_rank_sz = df_rank_sz[df_rank_sz['end']//100 <= x1//100]
             df_rank_sz = df_rank_sz[df_rank_sz['start']//100 >= x0//100]
-            
+            # df_rank_sz['adj_row'] = df_rank_sz['row'].shift(1)
+            # df_rank_sz.['adj_row'].iloc[0] = df_rank_sz['row'].iloc[0]
+            # df_rank_sz['adj_col'] = df_rank_sz['column'].shift(1) 
+            # df_rank_sz['adj_col'].iloc[0] = df_rank_sz['column'].iloc[0]
+            # df_rank_sz['adj_dist'] = ((df_rank_sz['row'] - df_rank_sz['adj_row']) ** 2 + (
+            #                 df_rank_sz['column'] - df_rank_sz['adj_column']) ** 2) ** 0.5
+
             if len(df_rank_sz) > 0:
+                df_rank_sz['adj_row'] = df_rank_sz['row'].shift(1)
+                df_rank_sz['adj_row'].iloc[0] = df_rank_sz['row'].iloc[0]
+                df_rank_sz['adj_col'] = df_rank_sz['column'].shift(1) 
+                df_rank_sz['adj_col'].iloc[0] = df_rank_sz['column'].iloc[0]
+                df_rank_sz['adj_dist'] = ((df_rank_sz['row'] - df_rank_sz['adj_row']) ** 2 + (
+                            df_rank_sz['column'] - df_rank_sz['adj_col']) ** 2) ** 0.5
+
                 initial_time = list(df_rank_sz['start'])[0]
                 row_ss = list(df_rank_sz['row'])[0]
                 column_ss = list(df_rank_sz['column'])[0]
@@ -2465,16 +3166,24 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 df_rank_sz['tt_sz'] = df_rank_sz['start'].shift(1)
                 df_rank_sz['tt_sz'].iloc[0] = df_rank_sz['start'].iloc[0]
                 df_rank_sz['tt_sz'] = df_rank_sz['start'] - df_rank_sz['tt_sz']
+                #df_rank_sz['tr-sz-rate'] = df_rank_sz['adj_dist']/df_rank_sz['tt_sz']
+                tr_rate = []
+                for i, j in zip(list(df_rank_sz['adj_dist']),list(df_rank_sz['tt_sz'])):
+                    if j !=0:
+                        tr_rate.append(i/j)
+
                 rec_row = list(df_rank_sz['row'])
                 rec_column = list(df_rank_sz['column'])
                 channels_start = df_rank_sz[df_rank_sz['start'] == initial_time]['channel']
                 duration = max(list(df_rank_sz[df_rank_sz['start'] == initial_time]['end'])) - initial_time
                 table_dict['sz-rate'] = round(table_dict['Distance'] / (np.mean(list(df_rank_sz['tt_sz']))), 2)
+                table_dict['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
                 groups['SZ-Channels'] = len(rec_row)
                 groups['SZ-max-duration'] = round(max(list(df_rank_sz['duration'])), 2)
                 groups['SZ-mean-duration'] = round(np.mean(np.array(df_rank_sz['duration'])), 2)
                 groups['SZ-distance'] = round(max(list(df_rank_sz['distance'])), 2)
                 groups['SZ-rate'] = round(table_dict['Distance'] / (np.mean(list(df_rank_sz['tt_sz']))), 2)
+                groups['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
 
                 start_row = []
                 start_column = []
@@ -2496,6 +3205,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 groups['SZ-mean-duration'] = 0
                 groups['SZ-distance'] = 0
                 groups['SZ-rate'] = 0
+                groups['tr-SZ-rate'] = 0
                 groups['SZ-start'] = str(0) + ', ' + str(0)
                 rec_row = []
                 rec_column = []
@@ -2506,15 +3216,18 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
             csv_file_name = output + '\\' + 'group_summary_log.csv'
+            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group1'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            df_rank_sz.to_csv(csv_file_name2,index=False)
+
 
             with open(csv_file_name, 'a') as myfile:
                 writer = csv.DictWriter(myfile,fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
                                                     'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
                                                     'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate'])
+                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
                 writer.writerow(groups)
                 myfile.close()
-
+        
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
             fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
@@ -2523,22 +3236,29 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
+
+
+            
+            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g1":
+                fig2.write_image(output+"\\group1_seizure_map"+"_"+str(btn_path_g1)+".pdf")
+
             return fig2, [table_dict,]
     else:
         return fig0, []
 
 
+
 @app.callback(
-    [Output('filt-g2', 'figure'), Output('table-sz-gp2','data')],
+    [Output('filt-g2', 'figure'), Output('table-sz-gp2','data'),Output('table-sz-freq-gp2','data'),Output('gp2-table-link1','href'),Output('gp2-table-link2','href')],
     [Input('ch_list-sz-g2', 'value'), Input('file_name_text', 'children'), Input('window1-g2', 'value'),
      Input('cutoff1-g2', 'value'), Input('window2-g2', 'value'), Input('cutoff2-g2', 'value'),
-     Input('detect_mode', 'value')])
-def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('detect_mode', 'value'),Input('btn-sep-2','n_clicks')],State('filt-g2', 'relayoutData'))
+def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_sep,selection):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ch_id = ch_num
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False:
-        return fig0, []
+        return fig0, [],[],"",""
     else:
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
@@ -2553,8 +3273,10 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         x = data[:, ch_id]
         x = convert_to_uV(x, parameters) / 1000000
         x = x - np.mean(x)
+        sig = x.copy()
         x = frequency_filter(x, sampling, "BTR", int(0), int(15), order=6)
-        t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1), float(cutoff1), int(smooth2), float(cutoff2),0.018,25)
+
+        t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1),float(cutoff1), int(smooth2), float(cutoff2),0.018,25)
         df_loop = detect_seizures(events, events_pp, tt, t)
         df_loop = check_false_positive(df_loop, peaks_raster,sampling, Frames)
         env_time = np.linspace(0, int(t[-1]), int(t[-1]))
@@ -2562,43 +3284,104 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         annot_time = []
         annot_text = []
         annot_value = []
+
         starts = []
         ends = []
         sz_nm = []
+        delta = []
+        alpha = []
+        beta = []
+        gamma = []
+        sz_num = []
         count = 0
+        dfPower = pd.DataFrame(columns=['sz_num','start','end','delta', 'alpha', 'beta', 'gamma'])
+
         for i in df_loop.index:
+
             if df_loop.loc[i, 'type'] != 'NS' and (~np.isnan(df_loop.loc[i,'start'])):
+
+                
+                
+
                 s = df_loop.loc[i, 'start']
                 e = df_loop.loc[i, 'end']
+                s_idx = int(s*sampling)
+                e_idx = int(e*sampling)
+                fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
+                         scaling='density',mode='psd')
+                chDelta = np.sum(Sxx[0:9],axis=0)
+                chAlpha = np.sum(Sxx[9:13],axis=0)
+                chBeta = np.sum(Sxx[13:31],axis=0)
+                chGamma = np.sum(Sxx[31:],axis=0)
+                delta.append(np.round(np.sum(chDelta),5))
+                alpha.append(np.round(np.sum(chAlpha),5))
+                beta.append(np.round(np.sum(chBeta),5))
+                gamma.append(np.round(np.sum(chGamma),5))
+
                 starts.append(s)
                 ends.append(e)
                 sz_nm.append(count)
                 num = count+1
+                sz_num.append(num)
                 text = df_loop.loc[i, 'type']
                 env[s:e] = 1
                 annot_time.append((s + e) / 2)
                 annot_value.append(1)
                 annot_text.append(text[0]+"("+str(num)+")")
                 count+=1
+        
+        dfPower['delta'] = delta
+        dfPower['alpha'] = alpha
+        dfPower['beta'] = beta
+        dfPower['gamma'] = gamma
+        dfPower['sz_num'] = sz_num
+        dfPower['start'] = starts
+        dfPower['end'] = ends
+        table9 = dfPower.to_dict("records")
 
-        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)
+        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)  
+        DF_IEF = pd.DataFrame.from_records(df_IEF)
+
         fig3 = go.Figure(data=go.Scatter(x=t[10000:], y=x[10000:], marker_color="green", name='Time Trace'))
         fig3.add_trace(go.Scatter(x=env_time, y=env, mode='lines', name='envelop'))
         fig3.add_trace(go.Scatter(x=annot_time, y=annot_value, mode='markers+text', text=annot_text, textposition="top center", name='events'))
         fig3.update_xaxes(showline=True, linewidth=1, title='Time, seconds', linecolor='black', mirror=True)
-        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, microVolts', linecolor='black', mirror=True)
+        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, mV', linecolor='black', mirror=True)
         fig3.update_layout(template="plotly_white", showlegend=True, height=800, width=1000, legend=dict(orientation="h"))
+        
         h5.close()
 
-        return fig3, df_IEF
+        output_string1 = DF_IEF.to_csv(index=False, encoding='utf-8')
+        output_string1 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string1)
+
+        output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
+        output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
+
+        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+                 path0['Filename'].split('\\')[-1].split('.')[0]
+        
+        ctx = dash.callback_context
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-2":
+            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+
+            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+                
+            fig3.write_image(output+"\\seizure_envelop_g2_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+            
+
+        return fig3, df_IEF,table9,output_string1,output_string2
+
 
 
 @app.callback(
     [Output('path-g2', 'figure'), Output('table5', 'data')],
     [Input('sz-analysis', 'value'), Input('g2_g2', 'selectedData'), Input('file_name_text', 'children'),
      Input('g7', 'relayoutData'), Input('window1-g2', 'value'), Input('cutoff1-g2', 'value'),
-     Input('window2-g2', 'value'), Input('cutoff2-g2', 'value'), Input('detect_mode', 'value')])
-def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('window2-g2', 'value'), Input('cutoff2-g2', 'value'), Input('detect_mode', 'value'),Input('btn-path-g2','n_clicks')])
+def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_path_g2):
     points = selectedData
     path0 = value['props']
     path0 = json.loads(path0['children'])
@@ -2718,6 +3501,12 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             df_rank_sz = df_rank_sz[df_rank_sz['start'] >= x0]
 
             if len(df_rank_sz) > 0:
+                df_rank_sz['adj_row'] = df_rank_sz['row'].shift(1)
+                df_rank_sz['adj_row'].iloc[0] = df_rank_sz['row'].iloc[0]
+                df_rank_sz['adj_col'] = df_rank_sz['column'].shift(1) 
+                df_rank_sz['adj_col'].iloc[0] = df_rank_sz['column'].iloc[0]
+                df_rank_sz['adj_dist'] = ((df_rank_sz['row'] - df_rank_sz['adj_row']) ** 2 + (
+                            df_rank_sz['column'] - df_rank_sz['adj_col']) ** 2) ** 0.5
                 initial_time = list(df_rank_sz['start'])[0]
                 row_ss = list(df_rank_sz['row'])[0]
                 column_ss = list(df_rank_sz['column'])[0]
@@ -2729,16 +3518,25 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 df_rank_sz['tt_sz'] = df_rank_sz['start'].shift(1)
                 df_rank_sz['tt_sz'].iloc[0] = df_rank_sz['start'].iloc[0]
                 df_rank_sz['tt_sz'] = df_rank_sz['start'] - df_rank_sz['tt_sz']
+                #df_rank_sz['tr-sz-rate'] = df_rank_sz['adj_dist']/df_rank_sz['tt_sz']
+                tr_rate = []
+                for i, j in zip(list(df_rank_sz['adj_dist']),list(df_rank_sz['tt_sz'])):
+                    if j !=0:
+                        tr_rate.append(i/j)
+ 
+
                 rec_row = list(df_rank_sz['row'])
                 rec_column = list(df_rank_sz['column'])
                 channels_start = df_rank_sz[df_rank_sz['start'] == initial_time]['channel']
                 duration = max(list(df_rank_sz[df_rank_sz['start'] == initial_time]['end'])) - initial_time
                 table_dict['sz-rate'] = round(table_dict['Distance'] / (np.mean(list(df_rank_sz['tt_sz']))), 2)
+                table_dict['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
                 groups['SZ-Channels'] = len(rec_row)
                 groups['SZ-max-duration'] = round(max(list(df_rank_sz['duration'])), 2)
                 groups['SZ-mean-duration'] = round(np.mean(np.array(df_rank_sz['duration'])), 2)
                 groups['SZ-distance'] = round(max(list(df_rank_sz['distance'])), 2)
                 groups['SZ-rate'] = round(table_dict['Distance'] / (np.mean(list(df_rank_sz['tt_sz']))), 2)
+                groups['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
                 start_row = []
                 start_column = []
                 for iterr in channels_start:
@@ -2757,6 +3555,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 groups['SZ-max-duration'] = 0
                 groups['SZ-distance'] = 0
                 groups['SZ-rate'] = 0
+                groups['tr-SZ-rate'] = 0
                 groups['SZ-start'] = str(0) + ', ' + str(0)
                 rec_row = []
                 rec_column = []
@@ -2773,10 +3572,11 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                                         fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
                                                     'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
                                                     'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate'])
+                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
                 writer.writerow(groups)
                 myfile.close()
-
+            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group2'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            df_rank_sz.to_csv(csv_file_name2,index=False)
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
             fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
@@ -2786,22 +3586,27 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
 
+            ctx = dash.callback_context
+            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g2":
+                fig2.write_image(output+"\\group2_seizure_map"+"_"+str(btn_path_g2)+".pdf")
+
             return fig2, [table_dict, ]
     else:
         return fig0, []
 
 
 @app.callback(
-    [Output('filt-g3', 'figure'),Output('table-sz-gp3','data')],
+    [Output('filt-g3', 'figure'),Output('table-sz-gp3','data'),Output('table-sz-freq-gp3','data'),Output('gp3-table-link1','href'),Output('gp3-table-link2','href')
+],
     [Input('ch_list-sz-g3', 'value'), Input('file_name_text', 'children'), Input('window1-g3', 'value'),
      Input('cutoff1-g3', 'value'), Input('window2-g3', 'value'), Input('cutoff2-g3', 'value'),
-     Input('detect_mode', 'value')])
-def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('detect_mode', 'value'),Input('btn-sep-3','n_clicks')],State('filt-g3', 'relayoutData'))
+def update_figure3(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_sep,selection):
     path0 = value['props']
     path0 = json.loads(path0['children'])
     ch_id = ch_num
     if ch_id is None or 'Filename' not in path0.keys() or check_filename(path0['Filename']) == False:
-        return fig0, []
+        return fig0, [],[],'',''
     else:
         path = path0['Filename']
         h5 = h5py.File(path, 'r')
@@ -2814,9 +3619,12 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         row, column = get_row_col_num(ch_id)
         ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
         x = data[:, ch_id]
-        x = convert_to_uV(x, parameters) / 100000
+        x = convert_to_uV(x, parameters) / 1000000
         x = x - np.mean(x)
+
+        sig = x.copy()
         x = frequency_filter(x, sampling, "BTR", int(0), int(15), order=6)
+
         t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1),float(cutoff1), int(smooth2), float(cutoff2),0.018,25)
         df_loop = detect_seizures(events, events_pp, tt, t)
         df_loop = check_false_positive(df_loop, peaks_raster,sampling, Frames)
@@ -2825,42 +3633,103 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         annot_time = []
         annot_text = []
         annot_value = []
+
         starts = []
         ends = []
         sz_nm = []
+        delta = []
+        alpha = []
+        beta = []
+        gamma = []
+        sz_num = []
         count = 0
+        dfPower = pd.DataFrame(columns=['sz_num','start','end','delta', 'alpha', 'beta', 'gamma'])
+
         for i in df_loop.index:
+
             if df_loop.loc[i, 'type'] != 'NS' and (~np.isnan(df_loop.loc[i,'start'])):
+
+                
+                
+
                 s = df_loop.loc[i, 'start']
                 e = df_loop.loc[i, 'end']
+                s_idx = int(s*sampling)
+                e_idx = int(e*sampling)
+                fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
+                         scaling='density',mode='psd')
+                chDelta = np.sum(Sxx[0:9],axis=0)
+                chAlpha = np.sum(Sxx[9:13],axis=0)
+                chBeta = np.sum(Sxx[13:31],axis=0)
+                chGamma = np.sum(Sxx[31:],axis=0)
+                delta.append(np.round(np.sum(chDelta),5))
+                alpha.append(np.round(np.sum(chAlpha),5))
+                beta.append(np.round(np.sum(chBeta),5))
+                gamma.append(np.round(np.sum(chGamma),5))
+
                 starts.append(s)
                 ends.append(e)
                 sz_nm.append(count)
                 num = count+1
+                sz_num.append(num)
                 text = df_loop.loc[i, 'type']
                 env[s:e] = 1
                 annot_time.append((s + e) / 2)
                 annot_value.append(1)
                 annot_text.append(text[0]+"("+str(num)+")")
                 count+=1
-        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)
+        
+        dfPower['delta'] = delta
+        dfPower['alpha'] = alpha
+        dfPower['beta'] = beta
+        dfPower['gamma'] = gamma
+        dfPower['sz_num'] = sz_num
+        dfPower['start'] = starts
+        dfPower['end'] = ends
+        table9 = dfPower.to_dict("records")
+
+        df_IEF = get_ief(peaks_raster,sampling,Frames,starts,ends,sz_nm)  
+        DF_IEF = pd.DataFrame.from_records(df_IEF)
+
         fig3 = go.Figure(data=go.Scatter(x=t[10000:], y=x[10000:], marker_color="green", name='Time Trace'))
         fig3.add_trace(go.Scatter(x=env_time, y=env, mode='lines', name='envelop'))
         fig3.add_trace(go.Scatter(x=annot_time, y=annot_value, mode='markers+text', text=annot_text, textposition="top center", name='events'))
         fig3.update_xaxes(showline=True, linewidth=1, title='Time, seconds', linecolor='black', mirror=True)
-        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, microVolts', linecolor='black', mirror=True)
+        fig3.update_yaxes(showline=True, linewidth=1, title='Voltage, mV', linecolor='black', mirror=True)
         fig3.update_layout(template="plotly_white", showlegend=True, height=800, width=1000, legend=dict(orientation="h"))
+        
+
         h5.close()
 
-        return fig3, df_IEF
+        output_string1 = DF_IEF.to_csv(index=False, encoding='utf-8')
+        output_string1 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string1)
+
+        output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
+        output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
+
+        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+                 path0['Filename'].split('\\')[-1].split('.')[0]
+        ctx = dash.callback_context
+
+        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-3":
+            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+
+            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+                
+            fig3.write_image(output+"\\seizure_envelop_g3_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+            
+
+        return fig3, df_IEF,table9,output_string1,output_string2
 
 
 @app.callback(
     [Output('path-g3', 'figure'), Output('table6', 'data')],
     [Input('sz-analysis', 'value'), Input('g2_g3', 'selectedData'), Input('file_name_text', 'children'),
      Input('g7', 'relayoutData'), Input('window1-g3', 'value'), Input('cutoff1-g3', 'value'),
-     Input('window2-g3', 'value'), Input('cutoff2-g3', 'value'), Input('detect_mode', 'value')])
-def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode):
+     Input('window2-g3', 'value'), Input('cutoff2-g3', 'value'), Input('detect_mode', 'value'),Input('btn-path-g3','n_clicks')])
+def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, smooth2, cutoff2, detect_mode,btn_path_g3):
     points = selectedData
     path0 = value['props']
     path0 = json.loads(path0['children'])
@@ -2971,6 +3840,12 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             df_rank_sz = df_rank_sz[df_rank_sz['end'] <= x1]
             df_rank_sz = df_rank_sz[df_rank_sz['start'] >= x0]
             if len(df_rank_sz) > 0:
+                df_rank_sz['adj_row'] = df_rank_sz['row'].shift(1)
+                df_rank_sz['adj_row'].iloc[0] = df_rank_sz['row'].iloc[0]
+                df_rank_sz['adj_col'] = df_rank_sz['column'].shift(1) 
+                df_rank_sz['adj_col'].iloc[0] = df_rank_sz['column'].iloc[0]
+                df_rank_sz['adj_dist'] = ((df_rank_sz['row'] - df_rank_sz['adj_row']) ** 2 + (
+                            df_rank_sz['column'] - df_rank_sz['adj_col']) ** 2) ** 0.5
                 initial_time = list(df_rank_sz['start'])[0]
                 row_ss = list(df_rank_sz['row'])[0]
                 column_ss = list(df_rank_sz['column'])[0]
@@ -2987,11 +3862,21 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 channels_start = df_rank_sz[df_rank_sz['start'] == initial_time]['channel']
                 duration = max(list(df_rank_sz[df_rank_sz['start'] == initial_time]['end'])) - initial_time
                 table_dict['sz-rate'] = round(table_dict['Distance'] / (np.mean(list(df_rank_sz['tt_sz']))), 2)
+                #df_rank_sz['tr-sz-rate'] = df_rank_sz['adj_dist']/df_rank_sz['tt_sz']
+                tr_rate = []
+                for i, j in zip(list(df_rank_sz['adj_dist']),list(df_rank_sz['tt_sz'])):
+                    if j !=0:
+                        tr_rate.append(i/j)
+
+
+                table_dict['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
                 groups['SZ-Channels'] = len(rec_row)
                 groups['SZ-max-duration'] = round(max(list(df_rank_sz['duration'])), 2)
                 groups['SZ-mean-duration'] = round(np.mean(np.array(df_rank_sz['duration'])), 2)
                 groups['SZ-distance'] = round(max(list(df_rank_sz['distance'])), 2)
                 groups['SZ-rate'] = round(table_dict['Distance'] / (np.mean(np.array(df_rank_sz['tt_sz']))), 2)
+                groups['tr-SZ-rate'] = round(np.mean(np.array(tr_rate)),2)
+
                 start_row = []
                 start_column = []
                 for iterr in channels_start:
@@ -3010,6 +3895,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 groups['SZ-mean-duration'] = 0
                 groups['SZ-distance'] = 0
                 groups['SZ-rate'] = 0
+                groups['tr-SZ-rate'] = 0
                 groups['SZ-start'] = str(0) + ', ' + str(0)
                 rec_row = []
                 rec_column = []
@@ -3020,13 +3906,15 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
             csv_file_name = output + '\\' + 'group_summary_log.csv'
+            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group3'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            df_rank_sz.to_csv(csv_file_name2,index=False)
 
             with open(csv_file_name, 'a') as myfile:
                 writer = csv.DictWriter(myfile,
                                         fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
                                                     'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
                                                     'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate'])
+                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
                 writer.writerow(groups)
                 myfile.close()
 
@@ -3038,6 +3926,11 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
+
+            ctx = dash.callback_context
+            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g3":
+                fig2.write_image(output+"\\group3_seizure_map"+"_"+str(btn_path_g3)+".pdf")
+
             return fig2, [table_dict, ]
     else:
         return fig0, []
