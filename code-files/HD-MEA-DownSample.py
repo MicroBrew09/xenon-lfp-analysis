@@ -250,8 +250,8 @@ def main(filename,newsampling,blocksize):
         start = end
     
     s = time.time()
-    click.echo("\n Down Sampled Output File Location: ", output_path)
-    click.echo("Time to complete:", round((s-b),2), "seconds")
+    print("\n Down Sampled Output File Location: ", output_path)
+    print("Time to complete:", round((s-b),2), "seconds")
 
 if __name__ == '__main__':
     main()

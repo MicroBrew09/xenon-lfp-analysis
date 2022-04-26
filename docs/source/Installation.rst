@@ -121,4 +121,5 @@ This example below is illustrated for the BrainWave4 Software, other aquisition 
 
 Downsample Exported Channels for Analysis
 -----------------------------------------
-The current example is illu
+The current example is illustrated to work with the 3Brain BioCAM-X recording using the BrainWave4 Software. \
+The code is provided in the `github Repository: <https://github.com/MicroBrew09/xenon-lfp-analysis.git>`
