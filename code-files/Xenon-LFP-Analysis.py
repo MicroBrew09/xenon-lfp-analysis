@@ -7,7 +7,6 @@ from dash import html
 import plotly.graph_objects as go
 import dash_daq as daq
 from dash import dash_table
-from flask_caching import Cache
 import json
 import scipy
 from scipy import signal

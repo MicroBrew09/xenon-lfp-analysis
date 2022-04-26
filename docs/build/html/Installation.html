@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &amp; Setup &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+  <title>Installation, Setup and Running Dash &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -39,8 +39,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation &amp; Setup</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#windows-option-1-using-python-environment">Windows Option 1: Using Python Environment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation, Setup and Running Dash</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#python-installation">Python Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-using-python-for-windows-environment">Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-using-anaconda-for-windows-and-macos-environment">Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#export-channels-for-analysis">Export Channels For Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hd-mea-recording-using-the-3brain-biocam-x-measurement-system">HD-MEA Recording using the 3Brain BioCAM-X Measurement System:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#downsample-exported-channels-for-analysis">Downsample Exported Channels for Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial &amp; Methods</a></li>
@@ -62,7 +71,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation &amp; Setup</li>
+      <li>Installation, Setup and Running Dash</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -72,25 +81,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="installation-setup">
-<h1>Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permalink to this headline"></a></h1>
-<p>Xenon LFP Analysis Platform is a Plotly Dash application running on Python. The instruction below are for installing Python for <em>Windows</em>. <em>Linux</em> and <em>Mac OS</em> by default have a <strong>Python</strong> installation, you can skip to Step-3.</p>
-<section id="windows-option-1-using-python-environment">
-<h2>Windows Option 1: Using Python Environment<a class="headerlink" href="#windows-option-1-using-python-environment" title="Permalink to this headline"></a></h2>
+  <section id="installation-setup-and-running-dash">
+<h1>Installation, Setup and Running Dash<a class="headerlink" href="#installation-setup-and-running-dash" title="Permalink to this headline"></a></h1>
+<p>Xenon LFP Analysis Platform is a Plotly Dash application running on <strong>Python</strong>. The instruction below are for installing Python for <em>Windows</em>. <em>Linux</em> and <em>Mac OS</em> by default have a <strong>Python</strong> installation, you can skip to installing the <strong>Python</strong> libraries from the <em>requirements.txt</em> file.</p>
+<section id="python-installation">
+<h2>Python Installation<a class="headerlink" href="#python-installation" title="Permalink to this headline"></a></h2>
+<section id="option-1-using-python-for-windows-environment">
+<h3>Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment<a class="headerlink" href="#option-1-using-python-for-windows-environment" title="Permalink to this headline"></a></h3>
 <ol class="arabic">
 <li><dl>
-<dt>Download <a class="reference external" href="https://www.python.org/downloads/windows/">Python&gt;3.7x</a></dt><dd><a class="reference internal image-reference" href="_images/installation1.png"><img alt="alternate text" class="align-center" src="_images/installation1.png" style="width: 600px; height: 400px;" /></a>
+<dt>Download <a class="reference external" href="https://www.python.org/downloads/windows/">Python&gt;3.7x</a></dt><dd><a class="reference internal image-reference" href="_images/installation1.png"><img alt="alternate text" class="align-center" src="_images/installation1.png" style="width: 300px; height: 200px;" /></a>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt>Run the downloaded installer file, “Do Not check Install for all users”, may need administrative permissions for all users. This will create a local environment for <strong>Python</strong> under <strong>Windows</strong> user account currently logged-in.</dt><dd><a class="reference internal image-reference" href="_images/installation2.png"><img alt="alternate text" class="align-center" src="_images/installation2.png" style="width: 600px; height: 400px;" /></a>
+<dt>Run the downloaded installer file, <strong>Do Not</strong> check “Install launcher for all users (recommended)”, may need administrative permissions for all users. This will create a local environment for <strong>Python</strong> under <strong>Windows</strong> user account currently logged-in.</dt><dd><a class="reference internal image-reference" href="_images/installation2.png"><img alt="alternate text" class="align-center" src="_images/installation2.png" style="width: 300px; height: 200px;" /></a>
 </dd>
 </dl>
 </li>
+<li><p>Install <strong>pip</strong>:</p>
+<blockquote>
+<div><ol class="loweralpha">
 <li><dl>
-<dt>Install <strong>pip</strong>:</dt><dd><ol class="loweralpha simple">
-<li><p>Once the <strong>Python</strong> installation is complete, open the <em>Command Prompt: cmd</em></p></li>
+<dt>Once the <strong>Python</strong> installation is complete, open the <em>Command Prompt</em>:</dt><dd><a class="reference internal image-reference" href="_images/installation7.png"><img alt="alternate text" class="align-center" src="_images/installation7.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
 </ol>
 <p>b. Check the <strong>pip</strong> installation:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;python -m pip –-version
@@ -100,14 +116,72 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">get</span><span class="o">-</span><span class="n">pip</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
+</div></blockquote>
+</li>
+</ol>
+<p>4. Install the required <strong>Python</strong> libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">install</span> <span class="s1">&#39;requirements.txt&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="option-2-using-anaconda-for-windows-and-macos-environment">
+<h3>Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment<a class="headerlink" href="#option-2-using-anaconda-for-windows-and-macos-environment" title="Permalink to this headline"></a></h3>
+<ol class="arabic">
+<li><dl>
+<dt>Download the appropriate <a class="reference external" href="https://www.anaconda.com/products/individual#windows">Anaconda-Version</a></dt><dd><a class="reference internal image-reference" href="_images/installation3.png"><img alt="alternate text" class="align-center" src="_images/installation3.png" style="width: 600px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Run the installer file:</dt><dd><a class="reference internal image-reference" href="_images/installation4.png"><img alt="alternate text" class="align-center" src="_images/installation4.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Select “Just Me (recommended)”” and continue to complete the installation:</dt><dd><a class="reference internal image-reference" href="_images/installation5.png"><img alt="alternate text" class="align-center" src="_images/installation5.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Select and open “Anaconda Prompt” from the <em>Windows</em> ‘Start’ Menu:</dt><dd><a class="reference internal image-reference" href="_images/installation6.png"><img alt="alternate text" class="align-center" src="_images/installation6.png" style="width: 300px; height: 200px;" /></a>
 </dd>
 </dl>
 </li>
 </ol>
-<p>4. Install the required Packages:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">install</span> <span class="s1">&#39;requirements.txt&#39;</span>
+<p>5.      Install the required <strong>Python</strong> libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s1">&#39;requirements.txt&#39;</span>
 </pre></div>
 </div>
+</section>
+</section>
+<section id="export-channels-for-analysis">
+<h2>Export Channels For Analysis<a class="headerlink" href="#export-channels-for-analysis" title="Permalink to this headline"></a></h2>
+<p>The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. The Dash application can only work within the capacity of the local memory, for this we export a subset of channels that are of interest and downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz.</p>
+<section id="hd-mea-recording-using-the-3brain-biocam-x-measurement-system">
+<h3>HD-MEA Recording using the 3Brain BioCAM-X Measurement System:<a class="headerlink" href="#hd-mea-recording-using-the-3brain-biocam-x-measurement-system" title="Permalink to this headline"></a></h3>
+<p>This example below is illustrated for the BrainWave4 Software, other aquisition systems may have a different process.</p>
+<ol class="arabic">
+<li><dl>
+<dt>Open BrainWave4 Software application:</dt><dd><a class="reference internal image-reference" href="_images/installation8.png"><img alt="alternate text" class="align-center" src="_images/installation8.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Open the compressed or uncompressed <strong>.brw</strong> <em>HDF5</em> recording file in the application:</dt><dd><a class="reference internal image-reference" href="_images/installation9.png"><img alt="alternate text" class="align-center" src="_images/installation9.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Export a group of channel: <strong>File-&gt; Export-&gt; Raw Data</strong> or <strong>Ctr + E</strong>, and select the subset of channels of interest, give it a file name and <strong>Export</strong>.</dt><dd><a class="reference internal image-reference" href="_images/installation10.png"><img alt="alternate text" class="align-center" src="_images/installation10.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+</ol>
+</section>
+</section>
+<section id="downsample-exported-channels-for-analysis">
+<h2>Downsample Exported Channels for Analysis<a class="headerlink" href="#downsample-exported-channels-for-analysis" title="Permalink to this headline"></a></h2>
+<p>The current example is illu</p>
 </section>
 </section>
 
