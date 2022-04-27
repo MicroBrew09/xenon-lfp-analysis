@@ -16,7 +16,7 @@
 
 
 # -- Project information -----------------------------------------------------
-import sphinxcontrib.video
+
 
 project = 'Xenon Lfp Analysis'
 copyright = '2022, Arjun Mahadevan'
