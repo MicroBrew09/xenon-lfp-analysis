@@ -7,6 +7,7 @@ from dash import html
 import plotly.graph_objects as go
 import dash_daq as daq
 from dash import dash_table
+from flask_caching import Cache
 import json
 import scipy
 from scipy import signal
@@ -69,8 +70,26 @@ def get_ch_number(x:int, y:int):
             This corresponds to the channel index from the 1 to 4096 channel grid.  
     
     '''
-    ch_number = x * 64 + y % 64
+    ch_number = (x-1) * 64 + (y-1) % 64
     return ch_number
+
+def get_chMap(chs):
+
+    chMap = {}
+    count = 0
+    for i in range(4096):
+        # print(i,n)
+        row = (count // 64) + 1
+        column = count % 64 + 1    
+        if column == 0:
+            column = 64
+        if row == 0:
+            row = 1
+            
+        chMap[i] = (row,column)
+        count+=1
+
+    return chMap
 
 def get_row_col_num(ch_number:int):
     
@@ -86,11 +105,12 @@ def get_row_col_num(ch_number:int):
         column (int): X axis value from the grid (corresponds to the column label)  
     
     '''
-    row = ch_number // 64
-    column = ch_number % 64
+    column = ch_number // 64 + 1
+    row = ch_number % 64 +1
+    if row == 0:
+        row = 64
     if column == 0:
-        column = 64
-
+        column = 1
     return row, column
 
 def butter_highpass(cutoff:np.float32, fs:np.float32, order=6):
@@ -1023,11 +1043,11 @@ def get_grid(column_list,row_list, column_20active,row_20active, selected_rows,s
     fig2 (Plotly Scatter Plot): Channel Grid scatter plot
     '''
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers',
+    fig2.add_trace(go.Scatter(x=row_list, y=column_list, marker={'color': 'grey', 'showscale': False}, mode='markers',
                        name='All Channels'))
-    fig2.add_trace(go.Scatter(x=column_20active, y=row_20active, marker={'color': 'green', 'showscale': False}, marker_size = 7,
+    fig2.add_trace(go.Scatter(x=row_20active, y=column_20active, marker={'color': 'green', 'showscale': False}, marker_size = 7,
                        mode='markers',name='Active Channels'))
-    fig2.add_trace(go.Scatter(x=column_20active[0:20], y=row_20active[0:20], marker={'color': 'red', 'showscale': False}, marker_size = 7,
+    fig2.add_trace(go.Scatter(x=row_20active[0:20], y=column_20active[0:20], marker={'color': 'red', 'showscale': False}, marker_size = 7,
                        mode='markers',name='20 Most Active Channels'))
     fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
     fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65],autorange="reversed")
@@ -2199,9 +2219,9 @@ def update_grid(n_clicks, img, value, img_file):
         image_filename = img_file
         
         fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'green', 'showscale': False}, mode='markers',
+        fig2.add_trace(go.Scatter(x=row_list, y=column_list, marker={'color': 'green', 'showscale': False}, mode='markers',
                     name='Active Channels'))
-        fig2.add_trace(go.Scatter(x=column_list_noise, y=row_list_noise, marker={'color': 'black', 'showscale': False},
+        fig2.add_trace(go.Scatter(x=row_list_noise, y=column_list_noise, marker={'color': 'black', 'showscale': False},
                     mode='markers',name='Noise Channels'))
         fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
         fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65],
