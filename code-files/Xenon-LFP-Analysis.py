@@ -482,6 +482,9 @@ def peak_raster_grid(data:np.ndarray, column_list:list, parameters:dict,prom: np
     '''
     Generates the raster plot with LFP activity as a function of time,
     and summary measures including LFP count, amplitude and duration. 
+    This function uses the find_peaks function in scipy.signal library:
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
+
 
         Args:
             data (numpy array): Numpy data array of shape (frames, channels) in mV.
@@ -1199,7 +1202,7 @@ app.layout = html.Div(children=[
                                         style={'text-align': 'center'}, className="three columns"),
 
                                     html.Div([html.Br()], className='one columns'),
-                                    html.Div([html.H5('LFP Raster Plots'),
+                                    html.Div([html.A(html.H6("LFP Raster Plots"),id='download-group',download="group-measures.csv",href="",target="_blank"),
                                               html.Div([dcc.Tabs([
                                                   dcc.Tab(label='LFP Detection (All Active Channels)',
                                                           style=tab_style, selected_style=tab_selected_style, children=[
@@ -1212,7 +1215,7 @@ app.layout = html.Div(children=[
                                                                       children=[html.Button('Summary Plot', id='btn-g9',style = button_style),dcc.Graph(id='g9', figure=fig1),
                                                                                 html.Div([
                                                                                     html.Div([daq.LEDDisplay(id='lfp',
-                                                                                                             label="LFP/S",
+                                                                                                             label="LFP Peaks/S",
                                                                                                              value='0.0',
                                                                                                              size=18,
                                                                                                              color="black",
@@ -1221,7 +1224,7 @@ app.layout = html.Div(children=[
                                                                                                         display='table-cell')),
                                                                                     html.Div([daq.LEDDisplay(
                                                                                         id='amplitude',
-                                                                                        label="Amplitude/S",
+                                                                                        label="LFP Peak Amplitude/S",
                                                                                         value='0.0', size=18,
                                                                                         color="black",
                                                                                         backgroundColor="#55B4B0")],
@@ -1229,7 +1232,7 @@ app.layout = html.Div(children=[
                                                                                                    display='table-cell')),
                                                                                     html.Div([daq.LEDDisplay(
                                                                                         id='duration',
-                                                                                        label="Duration/S", value='0.0',
+                                                                                        label="LFP Peak Duration/S", value='0.0',
                                                                                         size=18, color="black",
                                                                                         backgroundColor="#55B4B0")],
                                                                                         style=dict(width='30%',
@@ -1267,7 +1270,7 @@ app.layout = html.Div(children=[
                                                                                                                  'id': 'Group',
                                                                                                                  'type': 'numeric'},
                                                                                                              {
-                                                                                                                 'name': 'Total LFP Count (count/s)',
+                                                                                                                 'name': 'Total LFP Peak Count (count/s)',
                                                                                                                  'id': 'LFP-Count',
                                                                                                                  'type': 'numeric'},
                                                                                                              {
@@ -1279,7 +1282,7 @@ app.layout = html.Div(children=[
                                                                                                                  'id': 'Act-Channel',
                                                                                                                  'type': 'numeric'},
                                                                                                              {
-                                                                                                                 'name': 'LFP Count [Top 20] (count/s)',
+                                                                                                                 'name': 'LFP Peak Count [Top 20] (count/s)',
                                                                                                                  'id': 'LFP-Count20',
                                                                                                                  'type': 'numeric'
                                                                                                              },
@@ -1289,11 +1292,11 @@ app.layout = html.Div(children=[
                                                                                                                  'type': 'numeric'
                                                                                                              },
                                                                                                              {
-                                                                                                                 'name': 'Mean Amplitude [Top 20] (mV)',
+                                                                                                                 'name': 'Mean Peak Amplitude [Top 20] (mV)',
                                                                                                                  'id': 'Mean-Amplitude',
                                                                                                                  'type': 'numeric'},
                                                                                                              {
-                                                                                                                 'name': 'Mean Duration [Top 20] (S)',
+                                                                                                                 'name': 'Mean Peak Duration [Top 20] (S)',
                                                                                                                  'id': 'Mean-Duration',
                                                                                                                  'type': 'numeric'},
 
@@ -2234,13 +2237,13 @@ def update_grid(n_clicks, img, value, img_file):
         if not os.path.exists(output):
             os.makedirs(output)
 
-        csv_file_name = output + 'group_summary_log.csv'
+        # csv_file_name = output + 'group_summary_log.csv'
         
-        if not os.path.exists(csv_file_name):
-            df_groups = pd.DataFrame(columns=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel',
-                         'LFP-Count-perCH', 'LFP-Count-per-Time', 'time-first-event', 'SZ-Channels', 'SZ-start',
-                         'SZ-duration', 'SZ-distance', 'SZ-rate'])
-            df_groups.to_csv(csv_file_name, header=True, index=False)
+        # if not os.path.exists(csv_file_name):
+        #     df_groups = pd.DataFrame(columns=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel',
+        #                  'LFP-Count-perCH', 'LFP-Count-per-Time', 'time-first-event', 'SZ-Channels', 'SZ-start',
+        #                  'SZ-duration', 'SZ-distance', 'SZ-rate'])
+        #     df_groups.to_csv(csv_file_name, header=True, index=False)
 
     elif value and bool == False:
         path = 'Enter a Valid BrainWave4 .brw File (Uncompressed Exported - RAW)'
@@ -2315,7 +2318,7 @@ def update_peak_raster(n_clicks1, value, btn_g3, btn_g9, range_value, prom, wid,
 
 
 @app.callback(
-    [Output('g7', 'figure'), Output('g9_ch', 'figure'), Output('table2', 'data'), Output('g1_GRID','figure'),Output('g2_GRID','figure'),Output('g3_GRID','figure')],
+    [Output('g7', 'figure'), Output('g9_ch', 'figure'), Output('table2', 'data'), Output('g1_GRID','figure'),Output('g2_GRID','figure'),Output('g3_GRID','figure'),Output('download-group', 'href')],
     [Input('button-3', 'n_clicks'), Input('file_name_text', 'children'),Input('btn-g7','n_clicks'),Input('btn-g9_ch','n_clicks'),Input('btn-g1_GRID','n_clicks'),Input('btn-g2_GRID','n_clicks'),Input('btn-g3_GRID','n_clicks')],
     [State('my-range-slider', 'value'), State('my-toggle-switch_ras', 'value'), State('lower_ras', 'value'),
      State('upper_ras', 'value'),
@@ -2372,9 +2375,12 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         avg_amplitude_ch = []
         avg_duration_ch = []
         time_to_event = []
-
+        delta = []
+        beta = []
+        alpha = []
+        gamma = []
         df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number', 'atr-ch','lfp_count', 
-                                            'avg_amplitude', 'avg_duration','time_to_event'])
+                                            'avg_amplitude', 'avg_duration','delta','alpha','beta','gamma'])
         df_groups = pd.DataFrame(columns=['Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel', 'atr','LFP-Count20',
                                             'LFP-Count-CH', 'LFP-Count-Time','Mean-Amplitude', 'Mean-Duration'])
         df_groups['Group'] = [1, 2, 3]
@@ -2404,6 +2410,17 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
                     else:
                         sig = sig
                     peaks, properties = find_peaks(sig, prominence=float(prom), width=interval)
+                    fx, tx, Sxx = scipy.signal.spectrogram(sig, fs=parameters['samplingRate'], window='hann', nperseg=int(parameters['samplingRate']), 
+                                    noverlap=int(parameters['samplingRate']//2), return_onesided=True, scaling='density',mode='psd')
+                    chDelta = np.sum(Sxx[0:9],axis=0)
+                    chAlpha = np.sum(Sxx[9:13],axis=0)
+                    chBeta = np.sum(Sxx[13:31],axis=0)
+                    chGamma = np.sum(Sxx[31:],axis=0)
+                    delta.append(np.round(np.sum(chDelta),5))
+                    alpha.append(np.round(np.sum(chAlpha),5))
+                    beta.append(np.round(np.sum(chBeta),5))
+                    gamma.append(np.round(np.sum(chGamma),5))
+
                     chPeakWidth = scipy.signal.peak_widths(sig, peaks, rel_height=1)
                     chPeakWidth_ratio = np.sum(chPeakWidth[0])/parameters['samplingRate']/(np.max(x)-np.min(x))
                     spikes = np.arange(0, parameters['nRecFrames'], 1)[peaks]
@@ -2442,9 +2459,11 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
 
         output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
                  path0['Filename'].split('\\')[-1].split('.')[0]
-        if not os.path.exists(output):
-            os.makedirs(output)
-        csv_file_name = output + '\\' + 'summary_all.csv'
+        # # if not os.path.exists(output):
+        #     os.makedirs(output)
+        # csv_file_name = output + '\\' + 'summary_all.csv'
+
+        
 
         fig7.update_xaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,title_text='Time, Seconds')
         fig7.update_yaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,showticklabels=False,title_text="Channels")
@@ -2461,8 +2480,17 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         df_channel['lfp_count'] = lfp_count_ch
         df_channel['avg_amplitude'] = avg_amplitude_ch
         df_channel['avg_duration'] = avg_duration_ch
-        df_channel['time_to_event'] = time_to_event
-        df_channel.to_csv(csv_file_name, header=True, index=False)
+        df_channel['delta'] = delta
+        df_channel['alpha'] = alpha
+        df_channel['beta'] = beta
+        df_channel['gamma'] = gamma
+
+
+        outputString = df_channel.to_csv(index=False, encoding='utf-8')
+        outputString = "data:text/csv;charset=utf-8," + urllib.parse.quote(outputString)
+
+        #df_channel['time_to_event'] = time_to_event
+        # df_channel.to_csv(csv_file_name, header=True, index=False)
 
         tot_channel_0 = len(df_channel[df_channel['group_number'] == 0])
         tot_channel_1 = len(df_channel[df_channel['group_number'] == 1])
@@ -2554,11 +2582,11 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         fig10.update_xaxes(title_text='Time, Seconds', showgrid=False, linecolor='black', showticklabels=True,linewidth=2, showline=True,mirror=True, row=3, col=1)
         fig10.update_yaxes(showgrid=False, linecolor='black', showticklabels=True, linewidth=2, showline=True,mirror=True, row=3, col=1)
 
-        df_save = df_channel_0
-        df_save = df_save.append(df_channel_1)
-        df_save = df_save.append(df_channel_2)
-        csv_file_name = output + '\\' + 'summary.csv'
-        df_save.to_csv(csv_file_name, header=True, index=False)
+        # df_save = df_channel_0
+        # df_save = df_save.append(df_channel_1)
+        # df_save = df_save.append(df_channel_2)
+        # csv_file_name = output + '\\' + 'summary.csv'
+        # df_save.to_csv(csv_file_name, header=True, index=False)
 
         
         h5.close()
@@ -2577,11 +2605,11 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3_GRID":
             g3_GRID.write_image(output+"\\group3_grid"+"_"+str(btn_g3Grid)+".pdf")
 
-        return fig7, fig10, summary_dict, g1_GRID, g2_GRID, g3_GRID
+        return fig7, fig10, summary_dict, g1_GRID, g2_GRID, g3_GRID,outputString
 
 
     else:
-        return fig4, fig, [], fig, fig,fig
+        return fig4, fig, [], fig, fig,fig,""
 
 
 @app.callback(
@@ -3076,13 +3104,13 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                row = item['y']
-                column = item['x']
+                column = item['y']
+                row = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
                 x = data[:, ch_id]
-                x = convert_to_uV(x, parameters) / 100000
+                x = convert_to_uV(x, parameters) / 1000000
                 x = x - np.mean(x)
                 x = frequency_filter(x, sampling, "BTR", int(0), int(15), order=6)
                 t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1),float(cutoff1), int(smooth2),float(cutoff2), 0.018, 25)
@@ -3235,17 +3263,17 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
             csv_file_name = output + '\\' + 'group_summary_log.csv'
-            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group1'+'_sz_'+str(table_dict['time-int'])+'.csv'
-            df_rank_sz.to_csv(csv_file_name2,index=False)
+            # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group1'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            # df_rank_sz.to_csv(csv_file_name2,index=False)
 
 
-            with open(csv_file_name, 'a') as myfile:
-                writer = csv.DictWriter(myfile,fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
-                                                    'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
-                                                    'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
-                writer.writerow(groups)
-                myfile.close()
+            # with open(csv_file_name, 'a') as myfile:
+            #     writer = csv.DictWriter(myfile,fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
+            #                                         'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
+            #                                         'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
+            #                                         'SZ-distance', 'SZ-rate','tr-SZ-rate'])
+            #     writer.writerow(groups)
+            #     myfile.close()
         
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
@@ -3434,8 +3462,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                row = item['y']
-                column = item['x']
+                column = item['y']
+                row = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
@@ -3594,8 +3622,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                                                     'SZ-distance', 'SZ-rate','tr-SZ-rate'])
                 writer.writerow(groups)
                 myfile.close()
-            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group2'+'_sz_'+str(table_dict['time-int'])+'.csv'
-            df_rank_sz.to_csv(csv_file_name2,index=False)
+            # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group2'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            # df_rank_sz.to_csv(csv_file_name2,index=False)
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
             fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
@@ -3781,13 +3809,13 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                row = item['y']
-                column = item['x']
+                column = item['y']
+                row = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
                 x = data[:, ch_id]
-                x = convert_to_uV(x, parameters) / 100000
+                x = convert_to_uV(x, parameters) / 1000000
                 x = x - np.mean(x)
                 x = frequency_filter(x, sampling, "BTR", int(0), int(15), order=6)
                 t, events, tt, events_pp, peaks_raster = get_events_envelope(x, sampling, Frames, detect_mode,int(smooth1),float(cutoff1), int(smooth2),float(cutoff2), 0.018, 25)
@@ -3925,8 +3953,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
             csv_file_name = output + '\\' + 'group_summary_log.csv'
-            csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group3'+'_sz_'+str(table_dict['time-int'])+'.csv'
-            df_rank_sz.to_csv(csv_file_name2,index=False)
+            # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group3'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            # df_rank_sz.to_csv(csv_file_name2,index=False)
 
             with open(csv_file_name, 'a') as myfile:
                 writer = csv.DictWriter(myfile,

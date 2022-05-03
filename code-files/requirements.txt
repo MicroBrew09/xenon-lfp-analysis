@@ -30,3 +30,4 @@ tenacity==8.0.1
 tifffile==2022.2.9
 Werkzeug==2.0.3
 tqdm==2.2.3
+kaleido==0.2.1
