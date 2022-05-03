@@ -2380,6 +2380,8 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         group_num = []
         atr_ch = []
         lfp_count_ch = []
+        time_start = []
+        time_end = []
         avg_amplitude_ch = []
         avg_duration_ch = []
         time_to_event = []
@@ -2388,7 +2390,7 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         beta = []
         alpha = []
         gamma = []
-        df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number', 'atr-ch','lfp_count', 
+        df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number','time_start','time_end', 'atr-ch','lfp_count', 
                                             'avg_amplitude', 'avg_duration','delta','theta','alpha','beta','gamma'])
         df_groups = pd.DataFrame(columns=['Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel', 'atr','LFP-Count20',
                                             'LFP-Count-CH', 'LFP-Count-Time','Mean-Amplitude', 'Mean-Duration'])
@@ -2426,6 +2428,8 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
                     chAlpha = np.sum(Sxx[9:13],axis=0)
                     chBeta = np.sum(Sxx[13:31],axis=0)
                     chGamma = np.sum(Sxx[31:],axis=0)
+                    time_start.append(range_value[0])
+                    time_end.append(range_value[1])
                     delta.append(np.round(np.sum(chDelta),5))
                     theta.append(np.round(np.sum(chTheta),5))
                     alpha.append(np.round(np.sum(chAlpha),5))
@@ -2472,7 +2476,7 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
                  path0['Filename'].split('\\')[-1].split('.')[0]
         if not os.path.exists(output):
             os.makedirs(output)
-        csv_file_name = output + '\\' + 'ch_group_measures.csv'
+        # csv_file_name = output + '\\' + 'ch_group_measures.csv'
 
         
 
@@ -2488,6 +2492,8 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         df_channel['column_num'] = columns
         df_channel['group_number'] = group_num
         df_channel['atr-ch'] = atr_ch
+        df_channel['time_start'] = time_start
+        df_channel['time_end'] = time_end
         df_channel['lfp_count'] = lfp_count_ch
         df_channel['avg_amplitude'] = avg_amplitude_ch
         df_channel['avg_duration'] = avg_duration_ch
@@ -2502,7 +2508,7 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         outputString = "data:text/csv;charset=utf-8," + urllib.parse.quote(outputString)
 
         #df_channel['time_to_event'] = time_to_event
-        df_channel.to_csv(csv_file_name, header=True, index=False)
+        # df_channel.to_csv(csv_file_name, header=True, index=False)
 
         tot_channel_0 = len(df_channel[df_channel['group_number'] == 0])
         tot_channel_1 = len(df_channel[df_channel['group_number'] == 1])
