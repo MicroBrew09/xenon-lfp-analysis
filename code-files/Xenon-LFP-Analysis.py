@@ -1204,7 +1204,7 @@ app.layout = html.Div(children=[
                                     html.Div([html.Br()], className='one columns'),
                                     html.Div([html.A(html.H6("LFP Raster Plots"),id='download-group',download="group-measures.csv",href="",target="_blank"),
                                               html.Div([dcc.Tabs([
-                                                  dcc.Tab(label='LFP Detection (All Active Channels)',
+                                                  dcc.Tab(label='LFP Peak Detection (All Active Channels)',
                                                           style=tab_style, selected_style=tab_selected_style, children=[
                                                           html.Div([dcc.Tabs(vertical=False, children=[
                                                               dcc.Tab(label='Plot', style=tab_style,
@@ -1327,7 +1327,7 @@ app.layout = html.Div(children=[
                                              style={'text-align': 'center'}, className="five columns"),
                                     html.Div([html.H5('Analysis Settings'),
                                               html.Div([dcc.Tabs([
-                                                  dcc.Tab(label='LFP Detection', style=tab_style,
+                                                  dcc.Tab(label='LFP Peak Detection', style=tab_style,
                                                           selected_style=tab_selected_style, children=[
                                                           html.H5('Digital Filter Parameters:'),
                                                           html.Div(html.P([html.Br()])),
@@ -1561,8 +1561,13 @@ app.layout = html.Div(children=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]',
+                                                                                                          'name': 'δ: 0 to 4 Hz [mV^2/Hz]',
                                                                                                           'id': 'delta',
+                                                                                                          'type': 'numeric'
+                                                                                                      },
+                                                                                                      {
+                                                                                                          'name': 'θ: 4 to 8 Hz [mV^2/Hz]',
+                                                                                                          'id': 'theta',
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
@@ -1718,7 +1723,8 @@ app.layout = html.Div(children=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
                                                                                                                             {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'δ: 0 to 4 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'θ, θ: 4 to 8 Hz [mV^2/Hz]','id': 'theta','type': 'numeric'},
                                                                                                                             {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
                                                                                                                             {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
                                                                                                                             {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
@@ -1906,7 +1912,8 @@ app.layout = html.Div(children=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
                                                                                                                             {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'δ: 0 to 4 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'θ: 4 to 8 Hz [mV^2/Hz]','id': 'theta','type': 'numeric'},
                                                                                                                             {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
                                                                                                                             {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
                                                                                                                             {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
@@ -2092,7 +2099,8 @@ app.layout = html.Div(children=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
                                                                                                                             {'name': 'end (s)','id': 'end', 'type': 'numeric'},
-                                                                                                                            {'name': 'δ, θ: 1 to 8 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'δ: 0 to 4 Hz [mV^2/Hz]','id': 'delta','type': 'numeric'},
+                                                                                                                            {'name': 'θ: 4 to 8 Hz [mV^2/Hz]','id': 'theta','type': 'numeric'},
                                                                                                                             {'name': 'α: 8 to 12Hz [mV^2/Hz]','id': 'alpha','type': 'numeric'},
                                                                                                                             {'name': 'β: 12 to 30 Hz [mV^2/Hz]','id': 'beta','type': 'numeric'},
                                                                                                                             {'name': 'γ: above 30 Hz [mV^2/Hz]','id': 'gamma','type': 'numeric'},],
@@ -2376,11 +2384,12 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         avg_duration_ch = []
         time_to_event = []
         delta = []
+        theta = []
         beta = []
         alpha = []
         gamma = []
         df_channel = pd.DataFrame(columns=['ch_num', 'row_num', 'column_num', 'group_number', 'atr-ch','lfp_count', 
-                                            'avg_amplitude', 'avg_duration','delta','alpha','beta','gamma'])
+                                            'avg_amplitude', 'avg_duration','delta','theta','alpha','beta','gamma'])
         df_groups = pd.DataFrame(columns=['Group', 'LFP-Count', 'Tot-Channel', 'Act-Channel', 'atr','LFP-Count20',
                                             'LFP-Count-CH', 'LFP-Count-Time','Mean-Amplitude', 'Mean-Duration'])
         df_groups['Group'] = [1, 2, 3]
@@ -2412,11 +2421,13 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
                     peaks, properties = find_peaks(sig, prominence=float(prom), width=interval)
                     fx, tx, Sxx = scipy.signal.spectrogram(sig, fs=parameters['samplingRate'], window='hann', nperseg=int(parameters['samplingRate']), 
                                     noverlap=int(parameters['samplingRate']//2), return_onesided=True, scaling='density',mode='psd')
-                    chDelta = np.sum(Sxx[0:9],axis=0)
+                    chTheta = np.sum(Sxx[5:9],axis=0)
+                    chDelta = np.sum(Sxx[0:5],axis=0)
                     chAlpha = np.sum(Sxx[9:13],axis=0)
                     chBeta = np.sum(Sxx[13:31],axis=0)
                     chGamma = np.sum(Sxx[31:],axis=0)
                     delta.append(np.round(np.sum(chDelta),5))
+                    theta.append(np.round(np.sum(chTheta),5))
                     alpha.append(np.round(np.sum(chAlpha),5))
                     beta.append(np.round(np.sum(chBeta),5))
                     gamma.append(np.round(np.sum(chGamma),5))
@@ -2459,9 +2470,9 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
 
         output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
                  path0['Filename'].split('\\')[-1].split('.')[0]
-        # # if not os.path.exists(output):
-        #     os.makedirs(output)
-        # csv_file_name = output + '\\' + 'summary_all.csv'
+        if not os.path.exists(output):
+            os.makedirs(output)
+        csv_file_name = output + '\\' + 'ch_group_measures.csv'
 
         
 
@@ -2481,6 +2492,7 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         df_channel['avg_amplitude'] = avg_amplitude_ch
         df_channel['avg_duration'] = avg_duration_ch
         df_channel['delta'] = delta
+        df_channel['theta'] = theta
         df_channel['alpha'] = alpha
         df_channel['beta'] = beta
         df_channel['gamma'] = gamma
@@ -2490,7 +2502,7 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         outputString = "data:text/csv;charset=utf-8," + urllib.parse.quote(outputString)
 
         #df_channel['time_to_event'] = time_to_event
-        # df_channel.to_csv(csv_file_name, header=True, index=False)
+        df_channel.to_csv(csv_file_name, header=True, index=False)
 
         tot_channel_0 = len(df_channel[df_channel['group_number'] == 0])
         tot_channel_1 = len(df_channel[df_channel['group_number'] == 1])
@@ -2823,6 +2835,7 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
 
         dfPower = pd.DataFrame(columns=['row','col','time','delta', 'alpha', 'beta', 'gamma'])
         delta = []
+        theta = []
         alpha = []
         beta = []
         gamma = []
@@ -2848,11 +2861,13 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
                 fig5.update_xaxes(showline=True, linewidth=1, linecolor='black', type = 'log',mirror=True, showticklabels=True)
                 fx, tx, Sxx = scipy.signal.spectrogram(sig, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
-                chDelta = np.sum(Sxx[0:9],axis=0)
+                chDelta = np.sum(Sxx[0:5],axis=0)
+                chTheta = np.sum(Sxx[5:9],axis=0)
                 chAlpha = np.sum(Sxx[9:13],axis=0)
                 chBeta = np.sum(Sxx[13:31],axis=0)
                 chGamma = np.sum(Sxx[31:],axis=0)
                 delta.append(np.round(np.sum(chDelta),5))
+                theta.append(np.round(np.sum(chTheta),5))
                 alpha.append(np.round(np.sum(chAlpha),5))
                 beta.append(np.round(np.sum(chBeta),5))
                 gamma.append(np.round(np.sum(chGamma),5))
@@ -2872,14 +2887,17 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
                 freq_f, sig_fft_f = fft(sig_f, parameters['samplingRate'])
                 fx, tx, Sxx = scipy.signal.spectrogram(sig_f, fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
-                chDelta = np.sum(Sxx[0:9],axis=0)
+                chDelta = np.sum(Sxx[0:5],axis=0)
+                chTheta = np.sum(Sxx[5:9],axis=0)
                 chAlpha = np.sum(Sxx[9:13],axis=0)
                 chBeta = np.sum(Sxx[13:31],axis=0)
                 chGamma = np.sum(Sxx[31:],axis=0)
                 delta.append(np.round(np.sum(chDelta),5))
+                theta.append(np.round(np.sum(chTheta),5))
                 alpha.append(np.round(np.sum(chAlpha),5))
                 beta.append(np.round(np.sum(chBeta),5))
                 gamma.append(np.round(np.sum(chGamma),5))
+
 
                 tt = np.linspace(x0,x1,len(tx))
                 Row.append(row)
@@ -2897,6 +2915,7 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
             val = False
 
         dfPower['delta'] = delta
+        dfPower['theta'] = theta
         dfPower['alpha'] = alpha
         dfPower['beta'] = beta
         dfPower['gamma'] = gamma
@@ -2977,6 +2996,7 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         ends = []
         sz_nm = []
         delta = []
+        theta = []
         alpha = []
         beta = []
         gamma = []
@@ -2997,11 +3017,13 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
                 e_idx = int(e*sampling)
                 fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
-                chDelta = np.sum(Sxx[0:9],axis=0)
+                chDelta = np.sum(Sxx[0:5],axis=0)
+                chTheta = np.sum(Sxx[5:9],axis=0)
                 chAlpha = np.sum(Sxx[9:13],axis=0)
                 chBeta = np.sum(Sxx[13:31],axis=0)
                 chGamma = np.sum(Sxx[31:],axis=0)
                 delta.append(np.round(np.sum(chDelta),5))
+                theta.append(np.round(np.sum(chTheta),5))
                 alpha.append(np.round(np.sum(chAlpha),5))
                 beta.append(np.round(np.sum(chBeta),5))
                 gamma.append(np.round(np.sum(chGamma),5))
@@ -3019,6 +3041,7 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
                 count+=1
         
         dfPower['delta'] = delta
+        dfPower['theta'] = theta
         dfPower['alpha'] = alpha
         dfPower['beta'] = beta
         dfPower['gamma'] = gamma
@@ -3262,7 +3285,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
-            csv_file_name = output + '\\' + 'group_summary_log.csv'
+            # csv_file_name = output + '\\' + 'group_summary_log.csv'
             # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group1'+'_sz_'+str(table_dict['time-int'])+'.csv'
             # df_rank_sz.to_csv(csv_file_name2,index=False)
 
@@ -3336,6 +3359,7 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         ends = []
         sz_nm = []
         delta = []
+        theta = []
         alpha = []
         beta = []
         gamma = []
@@ -3356,11 +3380,13 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
                 e_idx = int(e*sampling)
                 fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
-                chDelta = np.sum(Sxx[0:9],axis=0)
+                chDelta = np.sum(Sxx[0:5],axis=0)
                 chAlpha = np.sum(Sxx[9:13],axis=0)
+                chTheta = np.sum(Sxx[5:9],axis=0)
                 chBeta = np.sum(Sxx[13:31],axis=0)
                 chGamma = np.sum(Sxx[31:],axis=0)
                 delta.append(np.round(np.sum(chDelta),5))
+                theta.append(np.round(np.sum(chTheta),5))
                 alpha.append(np.round(np.sum(chAlpha),5))
                 beta.append(np.round(np.sum(chBeta),5))
                 gamma.append(np.round(np.sum(chGamma),5))
@@ -3379,6 +3405,7 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         
         dfPower['delta'] = delta
         dfPower['alpha'] = alpha
+        dfPower['theta'] = theta
         dfPower['beta'] = beta
         dfPower['gamma'] = gamma
         dfPower['sz_num'] = sz_num
@@ -3612,18 +3639,20 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
-            csv_file_name = output + '\\' + 'group_summary_log.csv'
 
-            with open(csv_file_name, 'a') as myfile:
-                writer = csv.DictWriter(myfile,
-                                        fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
-                                                    'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
-                                                    'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
-                writer.writerow(groups)
-                myfile.close()
+            # csv_file_name = output + '\\' + 'group_summary_log.csv'
+
+            # with open(csv_file_name, 'a') as myfile:
+            #     writer = csv.DictWriter(myfile,
+            #                             fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
+            #                                         'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
+            #                                         'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
+            #                                         'SZ-distance', 'SZ-rate','tr-SZ-rate'])
+            #     writer.writerow(groups)
+            #     myfile.close()
             # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group2'+'_sz_'+str(table_dict['time-int'])+'.csv'
             # df_rank_sz.to_csv(csv_file_name2,index=False)
+
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
             fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
@@ -3685,6 +3714,7 @@ def update_figure3(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mod
         ends = []
         sz_nm = []
         delta = []
+        theta = []
         alpha = []
         beta = []
         gamma = []
@@ -3705,11 +3735,13 @@ def update_figure3(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mod
                 e_idx = int(e*sampling)
                 fx, tx, Sxx = scipy.signal.spectrogram(sig[s_idx:e_idx], fs=sampling, window='hann', nperseg=int(sampling), noverlap=int(sampling//2), return_onesided=True,
                          scaling='density',mode='psd')
-                chDelta = np.sum(Sxx[0:9],axis=0)
+                chDelta = np.sum(Sxx[0:5],axis=0)
+                chTheta = np.sum(Sxx[5:9],axis=0)
                 chAlpha = np.sum(Sxx[9:13],axis=0)
                 chBeta = np.sum(Sxx[13:31],axis=0)
                 chGamma = np.sum(Sxx[31:],axis=0)
                 delta.append(np.round(np.sum(chDelta),5))
+                theta.append(np.round(np.sum(chTheta),5))
                 alpha.append(np.round(np.sum(chAlpha),5))
                 beta.append(np.round(np.sum(chBeta),5))
                 gamma.append(np.round(np.sum(chGamma),5))
@@ -3727,6 +3759,7 @@ def update_figure3(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mod
                 count+=1
         
         dfPower['delta'] = delta
+        dfPower['theta'] = theta
         dfPower['alpha'] = alpha
         dfPower['beta'] = beta
         dfPower['gamma'] = gamma
@@ -3952,18 +3985,18 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             groups['Time-Stamp'] = str(datetime.now())
             output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
-            csv_file_name = output + '\\' + 'group_summary_log.csv'
-            # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group3'+'_sz_'+str(table_dict['time-int'])+'.csv'
-            # df_rank_sz.to_csv(csv_file_name2,index=False)
+            # csv_file_name = output + '\\' + 'group_summary_log.csv'
+            # # csv_file_name2 = output + '\\' + str(path0['Filename'].split('\\')[-1].split(".")[0])+ '_group3'+'_sz_'+str(table_dict['time-int'])+'.csv'
+            # # df_rank_sz.to_csv(csv_file_name2,index=False)
 
-            with open(csv_file_name, 'a') as myfile:
-                writer = csv.DictWriter(myfile,
-                                        fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
-                                                    'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
-                                                    'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
-                                                    'SZ-distance', 'SZ-rate','tr-SZ-rate'])
-                writer.writerow(groups)
-                myfile.close()
+            # with open(csv_file_name, 'a') as myfile:
+            #     writer = csv.DictWriter(myfile,
+            #                             fieldnames=['Time-Stamp', 'Time-Window', 'Group', 'LFP-Count', 'Tot-Channel',
+            #                                         'Act-Channel', 'LFP-Count-perCH', 'LFP-Count-per-Time',
+            #                                         'time-first-event', 'SZ-Channels', 'SZ-start', 'SZ-max-duration','SZ-mean-duration',
+            #                                         'SZ-distance', 'SZ-rate','tr-SZ-rate'])
+            #     writer.writerow(groups)
+            #     myfile.close()
 
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(x=column_list, y=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
