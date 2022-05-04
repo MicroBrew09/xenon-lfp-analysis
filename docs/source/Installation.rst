@@ -9,14 +9,14 @@ Windows
 ~~~~~~~~
 a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing>`_
 
-b. Copy + Paste the url (http://127.0.0.1:7080)in any browser to run the application:
+b. Copy + Paste the url (http://127.0.0.1:7080) in any browser to run the application:
 
 MacOS
 ~~~~~~
 
 a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
 
-b. Copy + Paste the url (http://127.0.0.1:7080)in any browser to run the application
+b. Copy + Paste the url (http://127.0.0.1:7080) in any browser to run the application
 
 
 Linux (Ubuntu/Debian)
