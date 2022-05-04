@@ -14,6 +14,11 @@ b. Copy + Paste the url (http://127.0.0.1:7080)in any browser to run the applica
 MacOS
 ~~~~~~
 
+a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
+
+b. Copy + Paste the url (http://127.0.0.1:7080)in any browser to run the application
+
+
 Linux (Ubuntu/Debian)
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,6 +39,9 @@ Linux (Ubuntu/Debian)
         :alt: alternate text
 
     d. Copy + Paste the url http://127.0.0.1:7080 in any browser. 
+
+
+
 
 Python Installation
 -------------------
