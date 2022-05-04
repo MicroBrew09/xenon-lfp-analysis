@@ -1,10 +1,44 @@
 Installation, Setup and Running Dash 
 ====================================
+Xenon LFP Analysis Platform is a Plotly Dash application running on **Python**. \
 
-Xenon LFP Analysis Platform is a Plotly Dash application running on **Python**. The instruction below are for installing Python for *Windows*. *Linux* and *Mac OS* by default have a **Python** installation, you can skip to installing the **Python** libraries from the *requirements.txt* file.
+Download and Run Executable:
+----------------------------
+
+Windows
+~~~~~~~~
+a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing>`_
+
+b. Copy + Paste the url (http://127.0.0.1:7080)in any browser to run the application:
+
+MacOS
+~~~~~~
+
+Linux (Ubuntu/Debian)
+~~~~~~~~~~~~~~~~~~~~~
+
+    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1TXi8-qeO1f3qPtOuSiadDNmbWgPMfGCL/view?usp=sharing>`_
+
+    b. Open a terminal window, cd in to the downloaded location.
+
+    c. Run the application
+
+    ::
+
+        $./Xenon-LFP-Analysis
+
+    .. image:: _static/pictures/installation14.png
+        :width: 400px
+        :align: center
+        :height: 100px
+        :alt: alternate text
+
+    d. Copy + Paste the url http://127.0.0.1:7080 in any browser. 
 
 Python Installation
 -------------------
+The instruction below are for installing Python for *Windows*. \ 
+*Linux* and *Mac OS* by default have a **Python** installation, you can skip to installing the **Python** libraries from the *requirements.txt* file.
 
 Option 1: Using **Python** for **Windows** Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
