@@ -105,12 +105,12 @@ def get_row_col_num(ch_number:int):
         column (int): X axis value from the grid (corresponds to the column label)  
     
     '''
-    column = ch_number // 64 + 1
-    row = ch_number % 64 +1
-    if row == 0:
-        row = 64
+    row = ch_number // 64 + 1
+    column = ch_number % 64 +1
     if column == 0:
-        column = 1
+        column = 64
+    if row == 0:
+        row = 1
     return row, column
 
 def butter_highpass(cutoff:np.float32, fs:np.float32, order=6):
@@ -428,8 +428,8 @@ def get_row_column_list(data: np.ndarray, chsList: list, parameters: dict):
     x_noise = []
     count = 0
     for item in chsList:
-        row = item['Row']
-        column = item['Col']
+        column = item['Row']
+        row = item['Col']
         x = data[:, count][0:int(10 * 60 * sampling)]
         x = x - np.mean(x)
         sig = abs(x)
@@ -438,8 +438,8 @@ def get_row_column_list(data: np.ndarray, chsList: list, parameters: dict):
             y_noise.append(row)
             x_noise.append(column)
         else:
-            y_active.append(item['Row'])
-            x_active.append(item['Col'])
+            y_active.append(row)
+            x_active.append(column)
         count += 1
     return y_active, x_active, y_noise, x_noise
 
@@ -1046,11 +1046,11 @@ def get_grid(column_list,row_list, column_20active,row_20active, selected_rows,s
     fig2 (Plotly Scatter Plot): Channel Grid scatter plot
     '''
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=row_list, y=column_list, marker={'color': 'grey', 'showscale': False}, mode='markers',
+    fig2.add_trace(go.Scatter(y=row_list, x=column_list, marker={'color': 'grey', 'showscale': False}, mode='markers',
                        name='All Channels'))
-    fig2.add_trace(go.Scatter(x=row_20active, y=column_20active, marker={'color': 'green', 'showscale': False}, marker_size = 7,
+    fig2.add_trace(go.Scatter(y=row_20active, x=column_20active, marker={'color': 'green', 'showscale': False}, marker_size = 7,
                        mode='markers',name='Active Channels'))
-    fig2.add_trace(go.Scatter(x=row_20active[0:20], y=column_20active[0:20], marker={'color': 'red', 'showscale': False}, marker_size = 7,
+    fig2.add_trace(go.Scatter(y=row_20active[0:20], x=column_20active[0:20], marker={'color': 'red', 'showscale': False}, marker_size = 7,
                        mode='markers',name='20 Most Active Channels'))
     fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
     fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65],autorange="reversed")
@@ -1701,7 +1701,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children=[
                                                                                 #html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp1-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp1-table-link1',download="g1-time-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-gp1',columns=[
                                                                                                                           {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                           {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -1718,7 +1718,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children =[ 
                                                                                     #                                        html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Power density table"),id='gp1-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp1-table-link2',download="g1-psd-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-freq-gp1',columns=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -1890,7 +1890,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children=[
                                                                                 #html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp2-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp2-table-link1',download="g2-time-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-gp2',columns=[
                                                                                                                           {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                           {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -1907,7 +1907,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children =[ 
                                                                                     #                                        html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Power density table"),id='gp2-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp2-table-link2',download="g2-psd-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-freq-gp2',columns=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -2077,7 +2077,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Time-series Measures",value='time-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children=[
                                                                                 #html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp3-table-link1',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Time-series table"),id='gp3-table-link1',download="g2-time-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-gp3',columns=[
                                                                                                                           {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                           {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -2094,7 +2094,7 @@ app.layout = html.Div(children=[
                                                                             dcc.Tab(label = "Power Density Measures",value='fft-table',style=tab_style,selected_style=tab_selected_style, children=[
                                                                                 html.Div(children =[ 
                                                                                     #                                        html.Br(),html.H5("Summary Table of Measures"),
-                                                                                html.Div(html.A(html.H6("Power density table"),id='gp3-table-link2',download="time-seizures.csv",href="",target="_blank"),),
+                                                                                html.Div(html.A(html.H6("Power density table"),id='gp3-table-link2',download="g3-psd-seizures.csv",href="",target="_blank"),),
                                                                                 html.Div(dash_table.DataTable(id='table-sz-freq-gp3',columns=[
                                                                                                                             {'name': 'sz #','id': 'sz_num','type': 'numeric'},
                                                                                                                             {'name': 'start (s)','id': 'start','type': 'numeric'},
@@ -3133,8 +3133,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                column = item['y']
-                row = item['x']
+                row = item['y']
+                column = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
@@ -3306,9 +3306,9 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
         
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(y=column_list, x=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
-            fig2.add_trace(go.Scatter(y=group_column, x=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
+            fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
             fig2.add_trace(go.Scatter(x=rec_column, y=rec_row, marker={'color': 'red', 'showscale': False}, mode='markers', name='Channels Recruited'))
-            fig2.add_trace(go.Scatter(y=start_column, x=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
+            fig2.add_trace(go.Scatter(x=start_column, y=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
             fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
@@ -3495,8 +3495,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                column = item['y']
-                row = item['x']
+                row = item['y']
+                column = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
@@ -3661,9 +3661,9 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(y=column_list, x=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
-            fig2.add_trace(go.Scatter(y=group_column, x=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
+            fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
             fig2.add_trace(go.Scatter(x=rec_column, y=rec_row, marker={'color': 'red', 'showscale': False}, mode='markers', name='Channels Recruited'))
-            fig2.add_trace(go.Scatter(y=start_column, x=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
+            fig2.add_trace(go.Scatter(x=start_column, y=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
             fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
@@ -3848,8 +3848,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             for item in points["points"]:
                 sz_rank_df = pd.DataFrame()
-                column = item['y']
-                row = item['x']
+                row = item['y']
+                column = item['x']
                 group_row.append(row)
                 group_column.append(column)
                 ch_id = np.where((chsList['Row'] == row) & (chsList['Col'] == column))[0][0]
@@ -4006,9 +4006,9 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(y=column_list, x=row_list, marker={'color': 'grey', 'showscale': False}, mode='markers', name='All Active Channels'))
-            fig2.add_trace(go.Scatter(y=group_column, x=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
+            fig2.add_trace(go.Scatter(x=group_column, y=group_row, marker={'color': 'blue', 'showscale': False}, mode='markers', name='Group1 Channels'))
             fig2.add_trace(go.Scatter(x=rec_column, y=rec_row, marker={'color': 'red', 'showscale': False}, mode='markers', name='Channels Recruited'))
-            fig2.add_trace(go.Scatter(y=start_column, x=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
+            fig2.add_trace(go.Scatter(x=start_column, y=start_row, marker={'color': 'green', 'showscale': False}, mode='markers', name='Point of Initiation'))
             fig2.update_xaxes(showline=True, linewidth=1, linecolor='black', range=[0, 65], mirror=True)
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
