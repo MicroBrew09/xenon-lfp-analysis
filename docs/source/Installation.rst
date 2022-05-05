@@ -22,7 +22,7 @@ b. Copy + Paste the url (http://127.0.0.1:7080) in any browser to run the applic
 Linux (Ubuntu/Debian)
 ~~~~~~~~~~~~~~~~~~~~~
 
-    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1TXi8-qeO1f3qPtOuSiadDNmbWgPMfGCL/view?usp=sharing>`_
+    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
 
     b. Open a terminal window, cd in to the downloaded location.
 
