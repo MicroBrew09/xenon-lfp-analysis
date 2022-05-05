@@ -51,7 +51,7 @@ The channels for each group are selected under their respective tab. Once respec
 analysis settings can be modified from the default followed by clicking on **Apply Setting and Generate Plots**, \
 which generates the raster plots and summary measures.
 
-   .. video:: _static/video/02-MEA-Group-Functions.mp4
+   .. video:: _static/video/02-b-MEA-Group-Functions.mp4
       :width: 600
       :height: 400
 
