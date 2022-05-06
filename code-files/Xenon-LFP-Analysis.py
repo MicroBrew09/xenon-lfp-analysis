@@ -2191,7 +2191,10 @@ app.layout = html.Div(children=[
                                 html.Div(html.P([html.Br(), html.Br()])),
                                 ])
 
+'''
+######## Callback Functions for dynamic Interactive Features and Rendering Plots, Tables and Measures ##########3
 
+'''
 @app.callback(
     [Output('file_name_text', 'children'), Output('g2', 'figure'), Output('table', 'data'),
      Output('my-range-slider', 'min'), Output('my-range-slider', 'max'), Output('my-range-slider', 'value'),

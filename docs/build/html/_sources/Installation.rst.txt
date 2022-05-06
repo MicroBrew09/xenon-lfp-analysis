@@ -16,7 +16,20 @@ MacOS
 
 a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
 
-b. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application
+b. Open a new terminal window, cd into the downloaded file location.
+
+c. Run the following command to change/confirm it is a Unix Executable.
+
+    ::
+
+    $ chmod u+x Xenon-LFP-Analysis
+
+d. Now you can double click on the file to run the application. 
+
+    If you get a security warning, click on the Apple logo -> System Preferences -> Security & Privacy \
+    at the bottom of the window, press 'Allow' to allow to file to run
+
+d. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application
 
 
 Linux (Ubuntu/Debian)
