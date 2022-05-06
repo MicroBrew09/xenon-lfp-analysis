@@ -26,8 +26,8 @@ c. Run the following command to change/confirm it is a Unix Executable.
 
 d. Now you can double click on the file to run the application. 
 
-    If you get a security warning, click on the Apple logo -> System Preferences -> Security & Privacy \
-    at the bottom of the window, press 'Allow' to allow the file to run.
+    If you get a security warning, click on the Apple logo -> System Preferences -> Security & Privacy. \
+    At the bottom of the window, press 'Allow' to allow the file to run.
 
 d. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application
 
