@@ -1286,11 +1286,7 @@ app.layout = html.Div(children=[
                                                                                                                  'id': 'LFP-Count20',
                                                                                                                  'type': 'numeric'
                                                                                                              },
-                                                                                                             {
-                                                                                                                 'name': 'Activity-Time-Ratio [Top 20]',
-                                                                                                                 'id': 'atr',
-                                                                                                                 'type': 'numeric'
-                                                                                                             },
+                                                                                                             
                                                                                                              {
                                                                                                                  'name': 'Mean Peak Amplitude [Top 20] (mV)',
                                                                                                                  'id': 'Mean-Amplitude',
@@ -1767,15 +1763,11 @@ app.layout = html.Div(children=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate [no unit*/s]',
                                                                                                           'id': 'sz-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
-                                                                                                      {
-                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
-                                                                                                          'id': 'tr-SZ-rate',
-                                                                                                          'type': 'numeric'
-                                                                                                      },
+                                                                                                      
 
                                                                                                   ],
                                                                                                   data=[],
@@ -1957,15 +1949,11 @@ app.layout = html.Div(children=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate [no unit*/s]',
                                                                                                           'id': 'sz-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
-                                                                                                      {
-                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
-                                                                                                          'id': 'tr-SZ-rate',
-                                                                                                          'type': 'numeric'
-                                                                                                      },
+                                                                                                      
 
                                                                                                   ],
                                                                                                   data=[],
@@ -2143,15 +2131,11 @@ app.layout = html.Div(children=[
                                                                                                           'type': 'numeric'
                                                                                                       },
                                                                                                       {
-                                                                                                          'name': 'Seizure Rate (old) [no unit*/s]',
+                                                                                                          'name': 'Seizure Rate [no unit*/s]',
                                                                                                           'id': 'sz-rate',
                                                                                                           'type': 'numeric'
                                                                                                       },
-                                                                                                      {
-                                                                                                          'name': 'Seizure Rate (trial) [no unit*/s]',
-                                                                                                          'id': 'tr-SZ-rate',
-                                                                                                          'type': 'numeric'
-                                                                                                      },
+                                                                                                      
 
                                                                                                   ],
                                                                                                   data=[],
