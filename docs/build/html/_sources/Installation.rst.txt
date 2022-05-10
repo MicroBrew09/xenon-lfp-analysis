@@ -222,7 +222,7 @@ when promted enter the full file path for the *.ns5* file, \
 and enter the desired sampling frequency. 
 ::
 
->python C:\\Downloads\\xenon-lfp-analysis\\code-files\\utah-array-conversion.py -f \\file-path\\Slice1_raw.brw :str -ns SamplingFrequency: int  
+>python C:\\Downloads\\xenon-lfp-analysis\\code-files\\utah-array-conversion.py -f \\file-path\\Slice1.ns5 :str -ns SamplingFrequency: int  
 
 or 
 
