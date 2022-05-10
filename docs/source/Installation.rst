@@ -204,6 +204,33 @@ or
 
 >python C:\\Downloads\\xenon-lfp-analysis\\code-files\\HD-MEA-DownSample.py
 
+
+HD-MEA Recording using the UTAH Array Measurement System:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A sample Utah array recording is provided in the `*.ns5 format. <https://www.dropbox.com/s/5a9ufj09nzpehjm/Iqseq_id520_007.ns5?dl=0>`_ , we have included a `code file <https://github.com/MicroBrew09/xenon-lfp-analysis.git>`_ \
+to extract the data and downsample to a lower frequency for analysis with the Xenon-LFP-Analysis platform. 
+
+1. 1.	Open Windows Command Prompt (cmd) if you are using Python base installation, or \
+Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.
+
+2. Download or clone the code-files from GitHub-Repository, \
+run the below command using the full path of the code file utah-array-conversion.py, when promted enter the full file path for the *.ns5* file, 
+and enter the desired sampling frequency. 
+::
+
+>python C:\\Downloads\\xenon-lfp-analysis\\code-files\\utah-array-conversion.py -f \\file-path\\Slice1_raw.brw :str -ns SamplingFrequency: int  
+
+or 
+
+::
+
+>python C:\\Downloads\\xenon-lfp-analysis\\code-files\\utah-array-conversion.py
+
+3. The `downsampled file <https://drive.google.com/file/d/1Ao1xW8prK4MasGJazjKWqtPbCJniIjBH/view?usp=sharing>`_ can be now be run on the Xenon-LFP-Analysis platform. The code may need a few modifications, \
+for larger recordings, the provided example is only a sample and may vary by use case, feel free to email or contact if you run into issues. 
+
+
 Running Dash and Xenon LFP Analysis Platform 
 ---------------------------------------------
 
