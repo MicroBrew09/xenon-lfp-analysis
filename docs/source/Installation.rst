@@ -106,6 +106,13 @@ Option 2: Using Anaconda for **Windows** and **MacOS** Environment
 
 Download and Run Executable:
 ----------------------------
+While Dash applications can be deployed on a server and run remotely, it does not work well in this case, particularly on the .brw and large HDF5 files. \
+The HDF5 files are not suitable for multiple parallel reads, or loading and transmitting data over a network, \ 
+it is quite challenging to load and transmit large chunks of the HDF5 files back and forth between the remote server and local storage.
+In this case we have found it inefficient, sometimes the file does not load, when the application is deployed on a remote server. \
+For efficient analysis, the Dash application needs to run on the \
+local machine and accessed through local host using the *pip installation package*, or the executable file as below,\
+it is also recommended that data files are present in the local hard-drive.
 
 Windows
 ~~~~~~~~
@@ -274,12 +281,6 @@ BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):
 The current example is illustrated to work with the 3Brain BioCAM-X recording using the BrainWave4 Software. \
 The code is provided in the `GitHub Repository: <https://github.com/MicroBrew09/xenon-lfp-analysis.git>`_
 
-While Dash applications can be deployed on a server and run remotely, it does not work well in this case, particularly on the .brw and large HDF5 files. \
-The HDF5 files are not suitable for multiple parallel reads, or loading and transmitting data over a network, \ 
-it is quite challenging to load and transmit large chunks of the HDF5 files back and forth between the remote server and local storage.
-In this case we have found it inefficient, sometimes the file does not load, when the application is deployed on a remote server. \
-For efficient analysis, the Dash application needs to run on the \
-local machine and accessed through local host as below, it is also recommended that data files are present in the local hard-drive.
 
 1.	Open Windows Command Prompt (cmd) if you are using Python base installation, or \
 Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.
