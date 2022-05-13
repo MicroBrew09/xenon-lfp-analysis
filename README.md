@@ -7,11 +7,11 @@ This is an interactive platform for analyzing bandpass filtered (1 to 2048 Hz) L
 ```
 pip install xenon_lfp_analysis
 ```
-## Run the Xenon LFP Analysis GUI:
+## Xenon LFP Analysis GUI:
 
-After installation you can run the GUI by running the following command in the terminal:
+After the pip installation, you can run the GUI by using the following command in the terminal:
 ```
-$>run_lfp_analysis
+$run_lfp_analysis
 ```
 
 ## Documentation
