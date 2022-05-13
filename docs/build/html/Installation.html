@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation, Setup and Running Dash &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+  <title>Installation, Setup and Running Xenon LFP Analysis GUI &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -39,16 +39,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation, Setup and Running Dash</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation, Setup and Running Xenon LFP Analysis GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-installation">Python Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-using-python-for-windows-environment">Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-using-anaconda-for-windows-and-macos-environment">Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#download-and-run-executable">Download and Run Executable:</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#macos">MacOS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linux-ubuntu-debian">Linux (Ubuntu/Debian)</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#python-installation">Python Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-1-using-python-for-windows-environment">Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-2-using-anaconda-for-windows-and-macos-environment">Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#export-channels-for-analysis">Export Channels For Analysis</a><ul>
@@ -85,7 +86,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation, Setup and Running Dash</li>
+      <li>Installation, Setup and Running Xenon LFP Analysis GUI</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -95,57 +96,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="installation-setup-and-running-dash">
-<h1>Installation, Setup and Running Dash<a class="headerlink" href="#installation-setup-and-running-dash" title="Permalink to this headline"></a></h1>
+  <section id="installation-setup-and-running-xenon-lfp-analysis-gui">
+<h1>Installation, Setup and Running Xenon LFP Analysis GUI<a class="headerlink" href="#installation-setup-and-running-xenon-lfp-analysis-gui" title="Permalink to this headline"></a></h1>
 <p>Xenon LFP Analysis Platform is a Plotly Dash application running on <strong>Python</strong>. </p>
-<section id="download-and-run-executable">
-<h2>Download and Run Executable:<a class="headerlink" href="#download-and-run-executable" title="Permalink to this headline"></a></h2>
-<section id="windows">
-<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
-<ol class="loweralpha simple">
-<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing">Xenon-LFP-Analysis-Windows</a></p></li>
-<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application:</p></li>
-</ol>
-</section>
-<section id="macos">
-<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline"></a></h3>
-<ol class="loweralpha">
-<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing">Xenon-LFP-Analysis-MacOS</a></p></li>
-<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
-<li><p>Run the following command to change/confirm it is a Unix Executable.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
+<ol class="arabic">
+<li><p>Install <strong>Python</strong> and <strong>pip</strong> module if not already installed.</p></li>
+<li><p>Install Xenon Lfp Analysis package</p>
 <blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">pip</span> <span class="n">install</span> <span class="n">xenon_lfp_analysis</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
-<li><p>Now you can double click on the file to run the application.</p>
+<li><p>To start the gui:</p>
 <blockquote>
-<div><p>If you get a security warning, click on the Apple logo -&gt; System Preferences -&gt; Security &amp; Privacy. At the bottom of the window, press ‘Allow’ to allow the file to run.</p>
-</div></blockquote>
-</li>
-</ol>
-<ol class="loweralpha simple" start="4">
-<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application</p></li>
-</ol>
-</section>
-<section id="linux-ubuntu-debian">
-<h3>Linux (Ubuntu/Debian)<a class="headerlink" href="#linux-ubuntu-debian" title="Permalink to this headline"></a></h3>
-<blockquote>
-<div><ol class="loweralpha simple">
-<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing">Xenon-LFP-Analysis-Ubuntu</a></p></li>
-<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
-<li><p>Run the application</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$./Xenon-LFP-Analysis
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">run_lfp_analysis</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="_images/installation14.png"><img alt="alternate text" class="align-center" src="_images/installation14.png" style="width: 400px; height: 100px;" /></a>
-<ol class="loweralpha simple" start="4">
-<li><p>Copy and Paste the url <a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a> in any browser.</p></li>
-</ol>
 </div></blockquote>
-</section>
+</li>
+<li><p>This should open the gui in the browser, you can view the video tutorials to get started.</p></li>
+</ol>
 </section>
 <section id="python-installation">
 <h2>Python Installation<a class="headerlink" href="#python-installation" title="Permalink to this headline"></a></h2>
@@ -218,6 +191,60 @@
 </div>
 </section>
 </section>
+<section id="download-and-run-executable">
+<h2>Download and Run Executable:<a class="headerlink" href="#download-and-run-executable" title="Permalink to this headline"></a></h2>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
+<ol class="loweralpha simple">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing">Xenon-LFP-Analysis-Windows</a></p></li>
+<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application:</p></li>
+</ol>
+</section>
+<section id="macos">
+<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline"></a></h3>
+<ol class="loweralpha">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing">Xenon-LFP-Analysis-MacOS</a></p></li>
+<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
+<li><p>Run the following command to change/confirm it is a Unix Executable.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Now you can double click on the file to run the application.</p>
+<blockquote>
+<div><p>If you get a security warning, click on the Apple logo -&gt; System Preferences -&gt; Security &amp; Privacy. At the bottom of the window, press ‘Allow’ to allow the file to run.</p>
+</div></blockquote>
+</li>
+</ol>
+<ol class="loweralpha simple" start="4">
+<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application</p></li>
+</ol>
+</section>
+<section id="linux-ubuntu-debian">
+<h3>Linux (Ubuntu/Debian)<a class="headerlink" href="#linux-ubuntu-debian" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing">Xenon-LFP-Analysis-Ubuntu</a></p></li>
+<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
+<li><p>Run the following command to change/confirm it is a Unix Executable.</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="4">
+<li><p>Run the application</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$./Xenon-LFP-Analysis
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="4">
+<li><p>Copy and Paste the url <a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a> in any browser.</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
 <section id="export-channels-for-analysis">
 <h2>Export Channels For Analysis<a class="headerlink" href="#export-channels-for-analysis" title="Permalink to this headline"></a></h2>
 <p>The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. The Dash application can only work within the capacity of the local memory, for this we export a subset of channels that are of interest and downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz.</p>
@@ -252,6 +279,13 @@
 <blockquote>
 <div><a class="reference internal image-reference" href="_images/installation11.png"><img alt="alternate text" class="align-center" src="_images/installation11.png" style="width: 800px; height: 300px;" /></a>
 </div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>If you have the the <strong>xenon_lfp_analysis</strong> package installed you can run the following to downsample <em>*.brw file</em></p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">downsample_brw</span>
+</pre></div>
+</div>
+<p>or</p>
 <p>2. Download or clone the code-files from GitHub-Repository, run the below command using the full path of the code file HD-MEA-DownSample.py.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">HD</span><span class="o">-</span><span class="n">MEA</span><span class="o">-</span><span class="n">DownSample</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> \\<span class="n">file</span><span class="o">-</span><span class="n">path</span>\\<span class="n">Slice1_raw</span><span class="o">.</span><span class="n">brw</span> <span class="p">:</span><span class="nb">str</span> <span class="o">-</span><span class="n">ns</span> <span class="n">SamplingFrequency</span><span class="p">:</span> <span class="nb">int</span> <span class="o">-</span><span class="n">bs</span> <span class="n">blocksize</span><span class="p">:</span> <span class="n">default</span> <span class="mi">100000</span>
 </pre></div>

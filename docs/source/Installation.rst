@@ -1,60 +1,26 @@
-Installation, Setup and Running Dash 
-====================================
+Installation, Setup and Running Xenon LFP Analysis GUI 
+======================================================
 Xenon LFP Analysis Platform is a Plotly Dash application running on **Python**. \
 
-Download and Run Executable:
-----------------------------
+Quick Start
+------------
 
-Windows
-~~~~~~~~
-a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing>`_
+1. Install **Python** and **pip** module if not already installed.
 
-b. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application:
 
-MacOS
-~~~~~~
+2. Install Xenon Lfp Analysis package
 
-a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
+    :: 
 
-b. Open a new terminal window, cd into the downloaded file location.
+        >pip install xenon_lfp_analysis
 
-c. Run the following command to change/confirm it is a Unix Executable.
-
+3. To start the gui:
+    
     ::
 
-    $ chmod u+x Xenon-LFP-Analysis
+        >run_lfp_analysis
 
-d. Now you can double click on the file to run the application. 
-
-    If you get a security warning, click on the Apple logo -> System Preferences -> Security & Privacy. \
-    At the bottom of the window, press 'Allow' to allow the file to run.
-
-d. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application
-
-
-Linux (Ubuntu/Debian)
-~~~~~~~~~~~~~~~~~~~~~
-
-    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
-
-    b. Open a new terminal window, cd into the downloaded file location.
-
-    c. Run the application
-
-    ::
-
-        $./Xenon-LFP-Analysis
-
-    .. image:: _static/pictures/installation14.png
-        :width: 400px
-        :align: center
-        :height: 100px
-        :alt: alternate text
-
-    d. Copy and Paste the url http://127.0.0.1:7080 in any browser. 
-
-
-
+4. This should open the gui in the browser, you can view the video tutorials to get started. 
 
 Python Installation
 -------------------
@@ -138,6 +104,62 @@ Option 2: Using Anaconda for **Windows** and **MacOS** Environment
 
 >python -m pip install 'requirements.txt'
 
+Download and Run Executable:
+----------------------------
+
+Windows
+~~~~~~~~
+a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing>`_
+
+b. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application:
+
+MacOS
+~~~~~~
+
+a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
+
+b. Open a new terminal window, cd into the downloaded file location.
+
+c. Run the following command to change/confirm it is a Unix Executable.
+
+    ::
+
+    $ chmod u+x Xenon-LFP-Analysis
+
+d. Now you can double click on the file to run the application. 
+
+    If you get a security warning, click on the Apple logo -> System Preferences -> Security & Privacy. \
+    At the bottom of the window, press 'Allow' to allow the file to run.
+
+d. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application
+
+
+Linux (Ubuntu/Debian)
+~~~~~~~~~~~~~~~~~~~~~
+
+    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
+
+    b. Open a new terminal window, cd into the downloaded file location.
+    c. Run the following command to change/confirm it is a Unix Executable.
+
+    ::
+
+    $ chmod u+x Xenon-LFP-Analysis
+
+    d. Run the application
+
+    ::
+
+        $./Xenon-LFP-Analysis
+
+    .. .. image:: _static/pictures/installation14.png
+    ..     :width: 400px
+    ..     :align: center
+    ..     :height: 100px
+    ..     :alt: alternate text
+
+    d. Copy and Paste the url http://127.0.0.1:7080 in any browser. 
+
 
 Export Channels For Analysis 
 ----------------------------
@@ -172,7 +194,7 @@ This example below is illustrated for the BrainWave4 Software, other aquisition 
         :align: center
         :height: 200px
         :alt: alternate text 
-    
+
 
 Downsample Exported Channels for Analysis
 -----------------------------------------
@@ -183,6 +205,7 @@ BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):
 The current example is illustrated to work with the 3Brain BioCAM-X recording using the BrainWave4 Software. \
 The code is provided in the `GitHub Repository: <https://github.com/MicroBrew09/xenon-lfp-analysis.git>`_
 
+
 1.	Open Windows Command Prompt (cmd) if you are using Python base installation, or \
 Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.
 
@@ -191,6 +214,14 @@ Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.
         :align: center
         :height: 300px
         :alt: alternate text 
+
+2. If you have the the **xenon_lfp_analysis** package installed you can run the following to downsample *\*.brw file*
+
+:: 
+
+>downsample_brw
+
+or  
 
 2. Download or clone the code-files from GitHub-Repository, \
 run the below command using the full path of the code file HD-MEA-DownSample.py. 
