@@ -147,11 +147,12 @@ Linux (Ubuntu/Debian)
     a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
 
     b. Open a new terminal window, cd into the downloaded file location.
+    
     c. Run the following command to change/confirm it is a Linux Executable.
 
     ::
 
-    $ chmod u+x Xenon-LFP-Analysis
+    $ chmod u+x Xenon-LFP-Analysis-ubuntu
 
     d. Run the application
 
