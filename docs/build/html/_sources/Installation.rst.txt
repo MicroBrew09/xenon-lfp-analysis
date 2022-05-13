@@ -147,7 +147,7 @@ Linux (Ubuntu/Debian)
     a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
 
     b. Open a new terminal window, cd into the downloaded file location.
-    c. Run the following command to change/confirm it is a Unix Executable.
+    c. Run the following command to change/confirm it is a Linux Executable.
 
     ::
 
@@ -172,7 +172,7 @@ Export Channels For Analysis
 ----------------------------
 
 The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. \
-The Dash application can only work within the capacity of the local memory, for this we export a subset of channels that are of interest and \
+The Dash application can only work within the capacity of the local memory, with the raw uncompressed data, for this we export a subset of channels that are of interest and \
 downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not \
 limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. \
 For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz. 

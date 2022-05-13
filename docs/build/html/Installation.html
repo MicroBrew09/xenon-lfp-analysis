@@ -230,7 +230,7 @@ In this case we have found it inefficient, sometimes the file does not load, whe
 <div><ol class="loweralpha simple">
 <li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing">Xenon-LFP-Analysis-Ubuntu</a></p></li>
 <li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
-<li><p>Run the following command to change/confirm it is a Unix Executable.</p></li>
+<li><p>Run the following command to change/confirm it is a Linux Executable.</p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis
 </pre></div>
@@ -249,7 +249,7 @@ In this case we have found it inefficient, sometimes the file does not load, whe
 </section>
 <section id="export-channels-for-analysis">
 <h2>Export Channels For Analysis<a class="headerlink" href="#export-channels-for-analysis" title="Permalink to this headline"></a></h2>
-<p>The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. The Dash application can only work within the capacity of the local memory, for this we export a subset of channels that are of interest and downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz.</p>
+<p>The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. The Dash application can only work within the capacity of the local memory, with the raw uncompressed data, for this we export a subset of channels that are of interest and downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz.</p>
 <section id="hd-mea-recording-using-the-3brain-biocam-x-measurement-system">
 <h3>HD-MEA Recording using the 3Brain BioCAM-X Measurement System:<a class="headerlink" href="#hd-mea-recording-using-the-3brain-biocam-x-measurement-system" title="Permalink to this headline"></a></h3>
 <p>This example below is illustrated for the BrainWave4 Software, other aquisition systems may have a different process.</p>
