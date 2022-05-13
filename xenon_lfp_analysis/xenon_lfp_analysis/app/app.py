@@ -2296,16 +2296,16 @@ def update_peak_raster(n_clicks1, value, btn_g3, btn_g9, range_value, prom, wid,
                                                                             interval,detect_mode, frame_value)
         h5.close()
 
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
-        if not os.path.exists(output):
-            os.makedirs(output)
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
+        # if not os.path.exists(output):
+        #     os.makedirs(output)
        
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3":
-            fig3.write_image(output+"\\all_channel_raster"+"_"+str(btn_g3)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3":
+        #     fig3.write_image(output+"\\all_channel_raster"+"_"+str(btn_g3)+".pdf")
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9":
-            fig9.write_image(output+"\\all_channel_summary"+"_"+str(btn_g9)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9":
+        #     fig9.write_image(output+"\\all_channel_summary"+"_"+str(btn_g9)+".pdf")
 
         return fig3, fig9, round(mean_LFP, 4), round(mean_amplitude, 4), round(mean_width, 4)
 
@@ -2460,11 +2460,11 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
             else:
                 pass
 
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
-        if not os.path.exists(output):
-            os.makedirs(output)
-        # csv_file_name = output + '\\' + 'ch_group_measures.csv'
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
+        # if not os.path.exists(output):
+        #     os.makedirs(output)
+        # # csv_file_name = output + '\\' + 'ch_group_measures.csv'
 
         
 
@@ -2472,8 +2472,8 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
         fig7.update_yaxes(showline=True, linewidth=1, showgrid=False, linecolor='black', mirror=True,showticklabels=False,title_text="Channels")
         fig_group_raster = go.Figure(fig7)
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g7":
-            fig_group_raster.write_image(output+"\\group_channel_raster"+"_"+str(btn_g7)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g7":
+        #     fig_group_raster.write_image(output+"\\group_channel_raster"+"_"+str(btn_g7)+".pdf")
 
         df_channel['ch_num'] = channel_list
         df_channel['row_num'] = rows
@@ -2599,17 +2599,17 @@ def update_channel_raster(n_clicks2, value, btn_g7,btn_g9_ch, btn_g1Grid,btn_g2G
 
         
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9_ch":
-            fig10.write_image(output+"\\group_summary"+"_"+str(btn_g9_ch)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g9_ch":
+        #     fig10.write_image(output+"\\group_summary"+"_"+str(btn_g9_ch)+".pdf")
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g1_GRID":
-            g1_GRID.write_image(output+"\\group1_grid"+"_"+str(btn_g1Grid)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g1_GRID":
+        #     g1_GRID.write_image(output+"\\group1_grid"+"_"+str(btn_g1Grid)+".pdf")
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g2_GRID":
-            g2_GRID.write_image(output+"\\group2_grid"+"_"+str(btn_g2Grid)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g2_GRID":
+        #     g2_GRID.write_image(output+"\\group2_grid"+"_"+str(btn_g2Grid)+".pdf")
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3_GRID":
-            g3_GRID.write_image(output+"\\group3_grid"+"_"+str(btn_g3Grid)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-g3_GRID":
+        #     g3_GRID.write_image(output+"\\group3_grid"+"_"+str(btn_g3Grid)+".pdf")
 
         return fig7, fig10, summary_dict, g1_GRID, g2_GRID, g3_GRID,outputString
 
@@ -2770,17 +2770,17 @@ def update_figure(n_clicks, ch_value, value, range_value,btn_true, toggle, lower
                 fig2.update_layout(template="plotly_white", showlegend=True, legend=dict(orientation="h"))
                 plot += 1
             h5.close()
-            output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
-            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-true":
+            # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+            #      path0['Filename'].split('\\')[-1].split('.')[0]
+            # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-true":
 
-                if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
-                    fig2.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+                # if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+                #     fig2.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
 
-                if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
-                    fig2.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+                # if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+                #     fig2.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
                 
-                fig2.write_image(output+"\\time_series_chs"+str(len(channels))+"_"+str(btn_true)+".pdf")
+                # fig2.write_image(output+"\\time_series_chs"+str(len(channels))+"_"+str(btn_true)+".pdf")
                 
 
  
@@ -2929,20 +2929,20 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
         h5.close()
 
         
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
         
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-fft":
-            if 'xaxis.range[0]' in selection2 and 'xaxis.range[1]' in selection2:
-                fig5.update_xaxes(range = [selection2['xaxis.range[0]'],selection2['xaxis.range[1]']])
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-fft":
+        #     if 'xaxis.range[0]' in selection2 and 'xaxis.range[1]' in selection2:
+        #         fig5.update_xaxes(range = [selection2['xaxis.range[0]'],selection2['xaxis.range[1]']])
 
-            if 'yaxis.range[0]' in selection2 and 'yaxis.range[1]' in selection2:
-                fig5.update_yaxes(range = [selection2['yaxis.range[0]'],selection2['yaxis.range[1]']])
+        #     if 'yaxis.range[0]' in selection2 and 'yaxis.range[1]' in selection2:
+        #         fig5.update_yaxes(range = [selection2['yaxis.range[0]'],selection2['yaxis.range[1]']])
                 
-            fig5.write_image(output+"\\fft_magnitude_chs"+str(len(ch_id))+"_"+str(btn_fft)+".pdf")
+        #     fig5.write_image(output+"\\fft_magnitude_chs"+str(len(ch_id))+"_"+str(btn_fft)+".pdf")
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-stft":     
-            fig6.write_image(output+"\\spectral_heatmap_chs"+str(len(ch_id))+"_"+str(btn_stft)+".pdf")
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-stft":     
+        #     fig6.write_image(output+"\\spectral_heatmap_chs"+str(len(ch_id))+"_"+str(btn_stft)+".pdf")
 
 
         return fig5,fig6,table9,output_string
@@ -3063,18 +3063,18 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
         output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
 
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
         
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep":
-            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
-                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep":
+        #     if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+        #         fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
 
-            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
-                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+        #     if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+        #         fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
                 
-            fig3.write_image(output+"\\seizure_envelop_g1_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+        #     fig3.write_image(output+"\\seizure_envelop_g1_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
 
         
             
@@ -3303,8 +3303,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
 
 
             
-            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g1":
-                fig2.write_image(output+"\\group1_seizure_map"+"_"+str(btn_path_g1)+".pdf")
+            # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g1":
+            #     fig2.write_image(output+"\\group1_seizure_map"+"_"+str(btn_path_g1)+".pdf")
 
             return fig2, [table_dict,]
     else:
@@ -3425,19 +3425,19 @@ def update_figure(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mode
         output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
         output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
 
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
         
-        ctx = dash.callback_context
+        # ctx = dash.callback_context
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-2":
-            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
-                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-2":
+        #     if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+        #         fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
 
-            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
-                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+        #     if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+        #         fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
                 
-            fig3.write_image(output+"\\seizure_envelop_g2_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+        #     fig3.write_image(output+"\\seizure_envelop_g2_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
             
 
         return fig3, df_IEF,table9,output_string1,output_string2
@@ -3632,7 +3632,7 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
                 start_row = []
 
             groups['Time-Stamp'] = str(datetime.now())
-            output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
+            # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + path0['Filename'].split('\\')[-1].split('.')[0]
 
             # csv_file_name = output + '\\' + 'group_summary_log.csv'
 
@@ -3656,9 +3656,9 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             fig2.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True, range=[0, 65], autorange="reversed")
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
 
-            ctx = dash.callback_context
-            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g2":
-                fig2.write_image(output+"\\group2_seizure_map"+"_"+str(btn_path_g2)+".pdf")
+            # ctx = dash.callback_context
+            # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g2":
+            #     fig2.write_image(output+"\\group2_seizure_map"+"_"+str(btn_path_g2)+".pdf")
 
             return fig2, [table_dict, ]
     else:
@@ -3781,18 +3781,18 @@ def update_figure3(ch_num, value, smooth1, cutoff1, smooth2, cutoff2, detect_mod
         output_string2 = dfPower.to_csv(index=False, encoding='utf-8')
         output_string2 = "data:text/csv;charset=utf-8," + urllib.parse.quote(output_string2)
 
-        output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
-                 path0['Filename'].split('\\')[-1].split('.')[0]
-        ctx = dash.callback_context
+        # output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
+        #          path0['Filename'].split('\\')[-1].split('.')[0]
+        # ctx = dash.callback_context
 
-        if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-3":
-            if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
-                fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
+        # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-sep-3":
+        #     if 'xaxis.range[0]' in selection and 'xaxis.range[1]' in selection:
+        #         fig3.update_xaxes(range = [selection['xaxis.range[0]'],selection['xaxis.range[1]']])
 
-            if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
-                fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
+        #     if 'yaxis.range[0]' in selection and 'yaxis.range[1]' in selection:
+        #         fig3.update_yaxes(range = [selection['yaxis.range[0]'],selection['yaxis.range[1]']])
                 
-            fig3.write_image(output+"\\seizure_envelop_g3_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
+        #     fig3.write_image(output+"\\seizure_envelop_g3_ch"+str(row)+"_"+str(column)+"_"+str(btn_sep)+".pdf")
             
 
         return fig3, df_IEF,table9,output_string1,output_string2
@@ -4002,8 +4002,8 @@ def display_selected_ch(tab, selectedData, value, selection, smooth1, cutoff1, s
             fig2.update_layout(template="plotly_white", clickmode='event+select', width=800, height=800, legend=dict(orientation="h"))
 
             ctx = dash.callback_context
-            if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g3":
-                fig2.write_image(output+"\\group3_seizure_map"+"_"+str(btn_path_g3)+".pdf")
+            # if ctx.triggered and ctx.triggered[0]['prop_id'].split('.')[0] == "btn-path-g3":
+            #     fig2.write_image(output+"\\group3_seizure_map"+"_"+str(btn_path_g3)+".pdf")
 
             return fig2, [table_dict, ]
     else:
