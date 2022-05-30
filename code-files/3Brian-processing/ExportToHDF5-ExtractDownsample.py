@@ -562,7 +562,7 @@ def file_check(path,filename):
 
 @click.command()
 @click.option('--folder','-f',prompt=True, help="Enter the full path of the folder containing the *.brw files and xx-export_CH.brw files: ")
-def main(folder,blocksize):
+def main(folder):
     fileCount = 1
     for filename in os.listdir(folder):
         filematch = False
