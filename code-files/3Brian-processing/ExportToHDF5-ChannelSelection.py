@@ -359,7 +359,7 @@ app.layout = html.Div(children=[html.Div([html.H2("Select, Downsample and Export
 
                                             html.Div([
                                                 html.Div([html.H5('Downsampling (Hz):')],style={'text-align': 'left', 'width': '90%','display': 'table-cell'}), 
-                                                html.Div([dcc.Input(id='NewSampling',type='number',value=100,max=5000)],style={'text-align': 'right', 'width': '10%','display': 'table-cell'}),
+                                                html.Div([dcc.Input(id='NewSampling',type='number',value=100,max=20000)],style={'text-align': 'right', 'width': '10%','display': 'table-cell'}),
                                             ],style=dict(width='110%', display='table')),
 
                                             html.Div([
