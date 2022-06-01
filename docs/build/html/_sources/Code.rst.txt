@@ -28,7 +28,7 @@ run the below command using the full path of the Python code file: *ExportToHDF5
 >python C:\Downloads\xenon-lfp-analysis\code-files\3Brain-processing\ExportToHDF5-ChannelSelection.py
 
 
-Copy and paste http://127.0.0.1:9090/ in the browser (Firefox or Chrome or Edge).
+Copy and paste http://127.0.0.1:9090/ in the browser.
 
 
 
@@ -85,6 +85,3 @@ it will process them one at a time.\
         :align: center
         :height: 100px
         :alt: alternate text 
-
-
-
