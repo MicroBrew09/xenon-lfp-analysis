@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pre-processing Tools &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+  <title>Additional Pre-processing Tools &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -41,7 +41,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation, Setup and Running Xenon LFP Analysis GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial &amp; Methods</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pre-processing Tools</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Pre-processing Tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#select-channels-to-export">Select channels to export</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#b-extract-selected-channels-from-brainwave-file-recording">B. Extract selected channels from BrainWave file recording</a></li>
 </ul>
@@ -63,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Pre-processing Tools</li>
+      <li>Additional Pre-processing Tools</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Code.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,8 +73,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pre-processing-tools">
-<h1>Pre-processing Tools<a class="headerlink" href="#pre-processing-tools" title="Permalink to this headline"></a></h1>
+  <section id="additional-pre-processing-tools">
+<h1>Additional Pre-processing Tools<a class="headerlink" href="#additional-pre-processing-tools" title="Permalink to this headline"></a></h1>
 <p>Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, works with uncompressed-RAW recording,however at times the recording for large duration measurements may be in the BrainWave4 or BrainWave5 proprietary Wavelet Compressed format, this requires the BrainWave4 or BrainWave5 Decompression class and methods,in this section we provide additional support files to select and export a set of channels from the RAW or Wavelet compressed format to the uncompressed RAW hdf5 file,that can be analysed in the Xenon LFP Analysis GUI.The code files generally works for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, however will require Python version 3.7 and the BrainWave5 software installed to uncompress the proprietary Wavelet compression data. </p>
 <p>It is a two step process to select, and then extract the channels from the large compressed measurement file. In the first step, a light weight interactive application <em>Select, Downsample and Export: Channel Selection Toolbox</em> is used to upload the slice image overlay, and select channels that need to be exported, this generates a <em>xx_exportCh</em> hdf5 file. In the second step, the measurement file along with the generated <em>xx_exportCh</em> hdf5 files are placed in a folder and the provided Python script is run to extract and downsample the selected channels. When you have multiple measurements files, you can have several pairs of measurement files and the selection file (xx_exportCh) in the same folder to process them as a batch.</p>
 <section id="select-channels-to-export">

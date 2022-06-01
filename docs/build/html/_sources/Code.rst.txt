@@ -1,5 +1,5 @@
-Pre-processing Tools
-=====================
+Additional Pre-processing Tools
+===============================
 
 Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, works with uncompressed-RAW recording,\
 however at times the recording for large duration measurements may be in the \
