@@ -25,7 +25,7 @@ run the below command using the full path of the Python code file: *ExportToHDF5
 
 ::
 
->python C:\\Downloads\\xenon-lfp-analysis\\code-files\\3Brain-processing\\ExportToHDF5-ChannelSelection.py
+>python C:\Downloads\xenon-lfp-analysis\code-files\3Brain-processing\ExportToHDF5-ChannelSelection.py
 
 
 Copy and paste http://127.0.0.1:9090/ in the browser (Firefox or Chrome or Edge).
@@ -67,13 +67,13 @@ B. Extract selected channels from BrainWave file recording
 -----------------------------------------------------------
 
 As mentioned earlier, to run this step you will first have to follow through on steps in the previous section to generate the *xx_exportCh* file, \
-have a local Python 3.7 environment with all the dependencies (**pip install xenon-lfp-analysis**), BrainWave5 software installed, and the path for the installtion, \
+have a local Python 3.7 environment with all the dependencies (**pip install xenon-lfp-analysis**), BrainWave5 software installed, and the path for the installation, \
 containing the *.dll files*. 
 
 1. Open a terminal window, run the the Python code file *ExportToHDF5-ExtractDownsample.py*. 
 ::
 
->python C:\\Downloads\\xenon-lfp-analysis\\code-files\\3Brain-processing\\ExportToHDF5-ChannelSelection.py
+>python C:\Downloads\xenon-lfp-analysis\code-files\3Brain-processing\ExportToHDF5-ExtractDownsample.py
 
 2. A prompt will come for the folder path, make sure the measurement file and the *xx_exportCh* files are in the same folder. \
 Note that the file names need to be matched as shown in the example below, and if you have multiple pairs of files in the same folder, \
