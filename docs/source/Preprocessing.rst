@@ -83,6 +83,12 @@ containing the *.dll files*.
 Note that the file names need to be matched as shown in the example below, and if you have multiple pairs of files in the same folder, \
 it will process them one at a time.\
 
+    .. image:: _static/pictures/Capture6.PNG
+        :width: 300px
+        :align: center
+        :height: 100px
+        :alt: alternate text 
+
     .. image:: _static/pictures/Capture5.PNG
         :width: 300px
         :align: center
