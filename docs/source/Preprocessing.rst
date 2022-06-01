@@ -86,8 +86,10 @@ it will process them one at a time.\
     .. image:: _static/pictures/Capture6.PNG
         :width: 300px
         :align: center
-        :height: 100px
+        :height: 50px
         :alt: alternate text 
+
+\
 
     .. image:: _static/pictures/Capture5.PNG
         :width: 300px
