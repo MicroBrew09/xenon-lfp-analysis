@@ -33,6 +33,7 @@ Copy and paste http://127.0.0.1:9090/ in the browser.
 
 
 1. Once the Dash application is running it should look as below:
+
     .. image:: _static/pictures/Capture1.PNG
         :width: 600px
         :align: center
@@ -49,12 +50,14 @@ and second the *cropped slice image file* to over lay on 4096 channel grid, uplo
         :alt: alternate text 
 
 3. You can now use the *lasso* tool or *box tool* to select channels to export, you can hold down the *shift key* to select multiple regions or un-check selected channels.  
+    
     .. image:: _static/pictures/Capture3.PNG
         :width: 600px
         :align: center
         :height: 400px
         :alt: alternate text 
 4. Once you have selected the channels, you can set the downsampling frequency, or reduce the number of channels in the region using the options provided and click **Export Channels to *.brw File**.  
+    
     .. image:: _static/pictures/Capture4.PNG
         :width: 600px
         :align: center
