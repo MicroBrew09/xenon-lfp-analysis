@@ -1,11 +1,11 @@
 Additional Pre-processing Tools
 ===============================
 
-Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, work with uncompressed-RAW recording, \
-however at times the recording for large duration measurements may be in the \
-BrainWave4 or BrainWave5 proprietary Wavelet Compressed format, this requires the BrainWave4 or BrainWave5 Decompression class and methods, \
-in this section we provide additional support code files to select and export a set of channels from the RAW or Wavelet compressed format to the uncompressed RAW hdf5 file, \
-that can be analysed in the Xenon LFP Analysis GUI. \
+Xenon-LFP-Analysis GUI and the code files discussed in the Tutorial sections work with uncompressed-RAW recording, \
+however at times the recording for large duration measurements may be in the BrainWave4 or BrainWave5 proprietary \
+Wavelet Compressed format. This requires the BrainWave4 or BrainWave5 Decompression class and methods. \
+In this section we provide additional support code files to select and export a set of channels from the RAW or \
+Wavelet compressed format to the uncompressed RAW hdf5 file that can be analyzed in the Xenon LFP Analysis GUI. \
 The code files generally work for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, \
 however will require Python version 3.7 and the BrainWave5 software installed to uncompress the proprietary Wavelet compression data. \
 \
