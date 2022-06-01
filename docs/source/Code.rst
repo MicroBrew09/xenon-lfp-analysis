@@ -19,13 +19,8 @@ Download or clone the code-files from GitHub-Repository, \
 run the below command using the full path of the code file HD-MEA-DownSample.py. 
 ::
 
->python C:\\Downloads\\xenon-lfp-analysis\\code-files\\3Brain-processing\\ExportToHDF5-ChannelSelection.py -f \\folder-path :str
-
-or 
-
-::
-
 >python C:\\Downloads\\xenon-lfp-analysis\\code-files\\3Brain-processing\\ExportToHDF5-ChannelSelection.py
+
 
 Copy and paste http://127.0.0.1:9090/ in the browser (Firefox or Chrome or Edge).
 
