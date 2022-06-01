@@ -1,12 +1,12 @@
 Additional Pre-processing Tools
 ===============================
 
-Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, works with uncompressed-RAW recording, \
+Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, work with uncompressed-RAW recording, \
 however at times the recording for large duration measurements may be in the \
 BrainWave4 or BrainWave5 proprietary Wavelet Compressed format, this requires the BrainWave4 or BrainWave5 Decompression class and methods, \
 in this section we provide additional support code files to select and export a set of channels from the RAW or Wavelet compressed format to the uncompressed RAW hdf5 file, \
-that can be analysed in the Xenon LFP Analysis GUI.\
-The code files generally works for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, \
+that can be analysed in the Xenon LFP Analysis GUI. \
+The code files generally work for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, \
 however will require Python version 3.7 and the BrainWave5 software installed to uncompress the proprietary Wavelet compression data. \
 \
 
@@ -61,7 +61,8 @@ and second the *cropped slice image file* to over lay on 4096 channel grid, uplo
         :height: 400px
         :alt: alternate text 
 
-5. This generates a **filename_exportCH** hdf5 file in the same folder as the measurement file. 
+5. This should generate a **filename_exportCH** hdf5 file in the same folder as the measurement file. \
+You can update the selection or edit settings, the file is overwritten with the latest settings, each time you click **Export Channels to *.brw File**. 
 
 B. Extract selected channels from BrainWave file recording
 -----------------------------------------------------------
@@ -75,7 +76,7 @@ containing the *.dll files*.
 
 >python C:\Downloads\xenon-lfp-analysis\code-files\3Brain-processing\ExportToHDF5-ExtractDownsample.py
 
-2. A prompt will come for the folder path, make sure the measurement file and the *xx_exportCh* files are in the same folder. \
+2. A prompt will come in the *Terminal Window* for the folder path, make sure the measurement file and the *xx_exportCh* files are in the same folder. \
 Note that the file names need to be matched as shown in the example below, and if you have multiple pairs of files in the same folder, \
 it will process them one at a time.\
 
