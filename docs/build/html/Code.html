@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pre-processing BrainWave Recording &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+  <title>Pre-processing Tools &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -41,12 +41,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation, Setup and Running Xenon LFP Analysis GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial &amp; Methods</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pre-processing BrainWave Recording</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#selecting-channels-to-export">Selecting channels to export</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#run-the-export-toolbox-dash-application">Run the <em>export:toolbox</em> Dash Application</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#downsample-and-extract-selected-channels-from-brainwave-file-recording">Downsample and extract selected channels from BrainWave file recording</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pre-processing Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#select-channels-to-export">Select channels to export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#b-extract-selected-channels-from-brainwave-file-recording">B. Extract selected channels from BrainWave file recording</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">MIT License</a></li>
@@ -66,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Pre-processing BrainWave Recording</li>
+      <li>Pre-processing Tools</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Code.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,27 +73,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pre-processing-brainwave-recording">
-<h1>Pre-processing BrainWave Recording<a class="headerlink" href="#pre-processing-brainwave-recording" title="Permalink to this headline"></a></h1>
-<p>In general the BrainWave measurement software records all 4096 channels at 11 KHz or 20KHz, Wavelet Compressed format, in this section we provide additional support files to select and export a set of channels to the uncompressed RAW hdf5 file,that will be accepted in the Xenon LFP Analysis GUI. This also includes uploading the slice image file to select channels. The code files generally works for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, if you do not have a slice image you can upload a dummy image file to get started.</p>
-<section id="selecting-channels-to-export">
-<h2>Selecting channels to export<a class="headerlink" href="#selecting-channels-to-export" title="Permalink to this headline"></a></h2>
-<p>To export channels you first need to run the Dash application and then follow through on the steps listed below.</p>
-<section id="run-the-export-toolbox-dash-application">
-<h3>Run the <em>export:toolbox</em> Dash Application<a class="headerlink" href="#run-the-export-toolbox-dash-application" title="Permalink to this headline"></a></h3>
-<p>Download or clone the code-files from GitHub-Repository, run the below command using the full path of the code file HD-MEA-DownSample.py.</p>
+  <section id="pre-processing-tools">
+<h1>Pre-processing Tools<a class="headerlink" href="#pre-processing-tools" title="Permalink to this headline"></a></h1>
+<p>Xenon-LFP-Analysis GUI and the code files dicussed in the Tutorial sections, works with uncompressed-RAW recording,however at times the recording for large duration measurements may be in the BrainWave4 or BrainWave5 proprietary Wavelet Compressed format, this requires the BrainWave4 or BrainWave5 Decompression class and methods,in this section we provide additional support files to select and export a set of channels from the RAW or Wavelet compressed format to the uncompressed RAW hdf5 file,that can be analysed in the Xenon LFP Analysis GUI.The code files generally works for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, however will require Python version 3.7 and the BrainWave5 software installed to uncompress the proprietary Wavelet compression data. </p>
+<p>It is a two step process to select, and then extract the channels from the large compressed measurement file. In the first step, a light weight interactive application <em>Select, Downsample and Export: Channel Selection Toolbox</em> is used to upload the slice image overlay, and select channels that need to be exported, this generates a <em>xx_exportCh</em> hdf5 file. In the second step, the measurement file along with the generated <em>xx_exportCh</em> hdf5 files are placed in a folder and the provided Python script is run to extract and downsample the selected channels. When you have multiple measurements files, you can have several pairs of measurement files and the selection file (xx_exportCh) in the same folder to process them as a batch.</p>
+<section id="select-channels-to-export">
+<h2>Select channels to export<a class="headerlink" href="#select-channels-to-export" title="Permalink to this headline"></a></h2>
+<p>A. Download or clone the code-files from GitHub-Repository, run the below command using the full path of the Python code file <em>ExportToHDF5-ChannelSelection.py</em>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="mi">3</span><span class="n">Brain</span><span class="o">-</span><span class="n">processing</span>\\<span class="n">ExportToHDF5</span><span class="o">-</span><span class="n">ChannelSelection</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>Copy and paste <a class="reference external" href="http://127.0.0.1:9090/">http://127.0.0.1:9090/</a> in the browser (Firefox or Chrome or Edge).</p>
 <ol class="arabic">
 <li><dl>
-<dt>Once the Dash application is running it should look as below.:</dt><dd><a class="reference internal image-reference" href="_images/Capture1.PNG"><img alt="alternate text" class="align-center" src="_images/Capture1.PNG" style="width: 600px; height: 400px;" /></a>
+<dt>Once the Dash application is running it should look as below:</dt><dd><a class="reference internal image-reference" href="_images/Capture1.PNG"><img alt="alternate text" class="align-center" src="_images/Capture1.PNG" style="width: 600px; height: 400px;" /></a>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt>You will need two inputs, first the <em>full folder path and file name</em> and second an image file to over lay on the slice using the <em>upload image</em> icon, to upload the cropped slice image (if you don’t have a slice image you still need to upload a dummy image to get to the next step).:</dt><dd><a class="reference internal image-reference" href="_images/Capture2.PNG"><img alt="alternate text" class="align-center" src="_images/Capture2.PNG" style="width: 600px; height: 400px;" /></a>
+<dt>You will need two inputs, first the <em>full folder path and file name</em> and second an image file to over lay on the slice using the <em>upload image</em> icon, to upload the cropped slice image (if you don’t have a slice image you still need to upload a dummy image to get to the next step):</dt><dd><a class="reference internal image-reference" href="_images/Capture2.PNG"><img alt="alternate text" class="align-center" src="_images/Capture2.PNG" style="width: 600px; height: 400px;" /></a>
 </dd>
 </dl>
 </li>
@@ -106,15 +101,14 @@
 </dl>
 </li>
 <li><dl>
-<dt>Once you have selected the channel, you can set the downsampling frequency, or reduce the number of channels in the region using the options provided and click <em>Export Channels to *.brw File</em>.</dt><dd><a class="reference internal image-reference" href="_images/Capture4.PNG"><img alt="alternate text" class="align-center" src="_images/Capture4.PNG" style="width: 600px; height: 400px;" /></a>
+<dt>Once you have selected the channels, you can set the downsampling frequency, or reduce the number of channels in the region using the options provided and click <strong>Export Channels to *.brw File</strong>.</dt><dd><a class="reference internal image-reference" href="_images/Capture4.PNG"><img alt="alternate text" class="align-center" src="_images/Capture4.PNG" style="width: 600px; height: 400px;" /></a>
 </dd>
 </dl>
 </li>
 </ol>
 </section>
-</section>
-<section id="downsample-and-extract-selected-channels-from-brainwave-file-recording">
-<h2>Downsample and extract selected channels from BrainWave file recording<a class="headerlink" href="#downsample-and-extract-selected-channels-from-brainwave-file-recording" title="Permalink to this headline"></a></h2>
+<section id="b-extract-selected-channels-from-brainwave-file-recording">
+<h2>B. Extract selected channels from BrainWave file recording<a class="headerlink" href="#b-extract-selected-channels-from-brainwave-file-recording" title="Permalink to this headline"></a></h2>
 </section>
 </section>
 
