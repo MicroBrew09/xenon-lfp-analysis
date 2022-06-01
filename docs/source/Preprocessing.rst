@@ -40,7 +40,7 @@ Copy and paste http://127.0.0.1:9090/ in the browser.
         :height: 400px
         :alt: alternate text  
 
-2. You will need two inputs, first the *full folder path along with the file name* for the measurement file (RAW or WaveletCompressed), \
+2. You will need two inputs, first the full folder path along with the file name for the measurement file (RAW or WaveletCompressed), \
 and second the *cropped slice image file* to over lay on 4096 channel grid, uploaded using the *upload image* icon (if you don't have a slice image you still need to upload a dummy image to get to the next step):
 
     .. image:: _static/pictures/Capture2.PNG

@@ -7,7 +7,7 @@ Xenon Lfp Analysis Platform
    
    Installation
    Tutorial
-   Code
+   Preprocessing
    License
 
 
