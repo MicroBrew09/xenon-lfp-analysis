@@ -1534,7 +1534,9 @@ app.layout = html.Div(children=[
                                                                         html.Div([html.Button('Time-series Plot', id='btn-true',style = button_style),dcc.Graph(id='true', figure=fig0)],style={'text-align': 'center'},className='six columns'),
                                                                         html.Div([dcc.Tabs(id='stft',value='fft-plot',children=[
                                                                             dcc.Tab(label = "Frequency Spectrum (FFT)",value='fft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([html.Br(),html.Button('Spectrum-amplitude Plot', id='btn-fft',style = button_style),dcc.Graph(id='fft', figure=fig0)],style={'text-align': 'center'},)]),
-                                                                            dcc.Tab(label = "Short-time Fourier Transform",value='stft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([html.Br(),html.Button('Power Spectral Density', id='btn-stft',style = button_style),dcc.Graph(id='density-figure', figure=fig0)],style={'text-align': 'center'},),
+                                                                            dcc.Tab(label = "Short-time Fourier Transform",value='stft-plot',style=tab_style,selected_style=tab_selected_style,children=[html.Div([html.Br(),html.Button('Power Spectral Density', id='btn-stft',style = button_style),
+                                                                                    dcc.RadioItems(id='rd-log', options=[{'label': 'Linear (mV^2/Hz)', 'value':'linear'},{'label': 'Log (dB) ','value':'log'}], value = 'linear',inline=True, style={"padding": "20px", "max-width": "800px", "margin": "auto"},),
+                                                                                    dcc.Graph(id='density-figure', figure=fig0)],style={'text-align': 'center'},),
                                                                                 html.Div(html.A(html.H6("Frequency Bands"),id='download-link3',download="freq-bands.csv",href="",target="_blank")),
                                                                                 html.Div([
                                                                                               dash_table.DataTable(
@@ -2792,10 +2794,10 @@ def update_figure(n_clicks, ch_value, value, range_value,btn_true, toggle, lower
 
 @app.callback(
     [Output('fft', 'figure'),Output('density-figure','figure'),Output('table9','data'),Output('download-link3', 'href')],
-    [Input('button-2','n_clicks'),Input('ch_list', 'value'),Input('true', 'relayoutData'),Input('file_name_text', 'children'),Input('btn-fft','n_clicks'),Input('btn-stft','n_clicks')],
+    [Input('button-2','n_clicks'),Input('ch_list', 'value'),Input('true', 'relayoutData'),Input('file_name_text', 'children'),Input('btn-fft','n_clicks'),Input('btn-stft','n_clicks'),Input('rd-log','value')],
     [State('my-toggle-switch', 'value'),State('lower', 'value'),State('upper', 'value'),State('TYPE','value'),State('fft','relayoutData'),State('density-figure','relayoutData')])
 
-def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,upper,type,selection2,selection3):
+def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,rd_log,toggle,lower,upper,type,selection2,selection3):
 
     path0 = value['props']
     path0 = json.loads(path0['children'])
@@ -2870,8 +2872,22 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
                 Col.append(column)
                 time.append(np.round((max(tt)-min(tt)),2))
                 fig6.update_layout(height=len(ch_id) * 300, width=1000)
-                fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
-                              zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
+
+                if rd_log=='log':
+                    SSxx = 20*np.log10(Sxx)
+                    Zmin = np.min(SSxx)
+                    Zmax = np.max(SSxx)
+                    fig6.add_trace(go.Heatmap(x = tt,y = fx,z = SSxx,type = 'heatmap',colorscale = 'Turbo',zmin=Zmin,zmax=Zmax, showscale=val),row=plot+1,col=1)
+                else:
+                    SSxx = Sxx
+                    Zmin = 0.00001
+                    Zmax = .0003
+                    fig6.add_trace(go.Heatmap(x = tt,y = fx,z = SSxx,type = 'heatmap',colorscale = 'turbo',
+                              zmin=Zmin,zmax=Zmax, showscale=val),row=plot+1,col=1)
+
+                # fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
+                #               zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
+
                 fig6.update_layout(showlegend=False)
                 #fig6.update_yaxes(range=[1,50])
             else:
@@ -2897,8 +2913,22 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
                 Col.append(column)
                 time.append(np.round((max(tt)-min(tt)),2))
                 fig6.update_layout(height=len(ch_id) * 300, width=1000)
-                fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
-                              zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
+
+                if rd_log=='log':
+                    SSxx = 20*np.log10(Sxx)
+                    Zmin = np.min(SSxx)
+                    Zmax = np.max(SSxx)
+                    fig6.add_trace(go.Heatmap(x = tt,y = fx,z = SSxx,type = 'heatmap',colorscale = 'Turbo',
+                              zmin=Zmin,zmax=Zmax, showscale=val),row=plot+1,col=1)        
+                else:
+                    SSxx = Sxx
+                    Zmin = 0.00001
+                    Zmax = .0003
+                    fig6.add_trace(go.Heatmap(x = tt,y = fx,z = SSxx,type = 'heatmap',colorscale = 'turbo',
+                              zmin=Zmin,zmax=Zmax, showscale=val),row=plot+1,col=1)
+
+                # fig6.add_trace(go.Heatmap(x = tt,y = fx,z = Sxx,type = 'heatmap',colorscale = 'turbo',
+                #               zmin=0.00001,zmax=.0003,showscale=val),row=plot+1,col=1)
                 fig6.update_layout(showlegend=False)
                 fig5.add_trace(go.Scatter(x=freq, y=sig_fft, mode='lines', name=label), row=plot+1, col=1)
                 fig5.add_trace( go.Scatter(x=freq_f, y=sig_fft_f, mode='lines', name=label + 'filter'),row= plot+1, col=1)
@@ -2926,7 +2956,6 @@ def update_fft(n_clicks,ch_id,selection,value,btn_fft,btn_stft,toggle,lower,uppe
         fig6.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
         fig6.update_layout(template="plotly_white", showlegend=False,)
         h5.close()
-
         
         output = '\\'.join(path0['Filename'].split('\\')[0:-1]) + '\\results-' + \
                  path0['Filename'].split('\\')[-1].split('.')[0]
