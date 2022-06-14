@@ -21,5 +21,6 @@ https://xenon-lfp-analysis.readthedocs.io/en/latest/index.html
 https://www.biorxiv.org/content/10.1101/2022.03.25.485521v1
 
 
-## Contact
+## Publication
+https://www.frontiersin.org/articles/10.3389/fnins.2022.904931/abstract
 
