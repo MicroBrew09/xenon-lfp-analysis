@@ -116,14 +116,14 @@ it is also recommended that data files are present in the local hard-drive.
 
 Windows
 ~~~~~~~~
-a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/17yPDSz-fjV8okBTVj0NMd-0fA4f1YWy1/view?usp=sharing>`_
+a. Download the application `Xenon-LFP-Analysis-Windows <https://drive.google.com/file/d/1ty1AqxGgfzMHZUJbBtptYpODZF6GU6O5/view?usp=sharing>`_
 
 b. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the application:
 
 MacOS
 ~~~~~~
 
-a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1hjn7Xm4I3NwcZxlnSF4ORpJE2ovUWeIz/view?usp=sharing>`_
+a. Download the application `Xenon-LFP-Analysis-MacOS <https://drive.google.com/file/d/1SqnkbsohdFKKajLGweQUE1bKjUqkSvci/view?usp=sharing>`_
 
 b. Open a new terminal window, cd into the downloaded file location.
 
@@ -144,7 +144,7 @@ d. Copy and Paste the url (http://127.0.0.1:7080) in any browser to run the appl
 Linux (Ubuntu/Debian)
 ~~~~~~~~~~~~~~~~~~~~~
 
-    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1kVrFbxkJt-2xlmnf64OJF8_vSbzs7_Cs/view?usp=sharing>`_
+    a. Download the application `Xenon-LFP-Analysis-Ubuntu <https://drive.google.com/file/d/1zy7M5yFTEWcW0ZY8J8Qn0L7WT-tdWHfE/view?usp=sharing>`_
 
     b. Open a new terminal window, cd into the downloaded file location.
     
