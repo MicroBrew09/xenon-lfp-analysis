@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial &amp; Methods &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Additional Pre-processing Tools" href="Preprocessing.html" />
+    <link rel="prev" title="Installation, Setup and Running Xenon LFP Analysis GUI" href="Installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Xenon Lfp Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation, Setup and Running Xenon LFP Analysis GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial &amp; Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mea-viewer-functions">MEA Viewer Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#brainwave4-brw-hdf5-files-3brain-biocam-x-measurement">1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getting-started">Getting started:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mea-group-functions">MEA Group Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mea-seizure-detection-functions">MEA Seizure Detection Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Preprocessing.html">Additional Pre-processing Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">MIT License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Xenon Lfp Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial &amp; Methods</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-methods">
+<h1>Tutorial &amp; Methods<a class="headerlink" href="#tutorial-methods" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="mea-viewer-functions">
+<span id="tutorials"></span><h2>MEA Viewer Functions<a class="headerlink" href="#mea-viewer-functions" title="Permalink to this headline"></a></h2>
+<section id="brainwave4-brw-hdf5-files-3brain-biocam-x-measurement">
+<h3>1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):<a class="headerlink" href="#brainwave4-brw-hdf5-files-3brain-biocam-x-measurement" title="Permalink to this headline"></a></h3>
+<dl>
+<dt>This module shows the data explorer funcitons in the Xenon LFP Analysis Platform. A quick look at the function is demonstrated in the video below.</dt><dd>
+    <video width="600" height="400" controls >
+    <source src="_static/video/01-MEA-Viewer-Functions.mp4" type="video/mp4">
+    Video
+    </video>
+    </dd>
+</dl>
+<p>In the below section we will go over the steps highlighted in the video to explore data, generate raster plots, apply digital filters, view full traces as a time series, generate spectrum plots, and spectral density corresponding to different frequency bands.</p>
+<section id="getting-started">
+<h4>Getting started:<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h4>
+<p>Input the file path, select the image file to start, and click submit.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Input File: Copy and paste the full input file path (#1)</p></li>
+<li><p>Select the location of the image file (#2) (Optional)</p></li>
+<li><p>If you are not using an image file, click ‘SUBMIT’ (#3)</p></li>
+</ol>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/tutorial1.jpg"><img alt="alternate text" class="align-center" src="_images/tutorial1.jpg" style="width: 600px; height: 100px;" /></a>
+</div></blockquote>
+</div></blockquote>
+</section>
+</section>
+</section>
+<section id="mea-group-functions">
+<h2>MEA Group Functions<a class="headerlink" href="#mea-group-functions" title="Permalink to this headline"></a></h2>
+<section id="id1">
+<h3>1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>The channel group functions are aimed at comparing two or three different regions of the slice, and compare LFP activity summary measures, while also generating a raster plot to study difference in activity pattern in different regions. The analysis starts with the <strong>Channels Groups</strong> tab (see below video). Channels groups can be selected by clicking on channels or by using the box or lasso draw tool to select multiple channels at the same time. The groups tab enables selecting channels under three groups (Group1, Group 2, and Group3). The channels for each group are selected under their respective tab. Once respective groups and channels are selected, analysis settings can be modified from the default followed by clicking on <strong>Apply Setting and Generate Plots</strong>, which generates the raster plots and summary measures.</p>
+<blockquote>
+<div>
+    <video width="600" height="400" controls >
+    <source src="_static/video/02-b-MEA-Group-Functions.mp4" type="video/mp4">
+    Video
+    </video>
+    </div></blockquote>
+</section>
+</section>
+<section id="mea-seizure-detection-functions">
+<h2>MEA Seizure Detection Functions<a class="headerlink" href="#mea-seizure-detection-functions" title="Permalink to this headline"></a></h2>
+<section id="id2">
+<h3>1. BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<p>The channel group raster is required to perform the seizure detection and analysis. Each group has a separate tab under which individual channels can be selected to view seizure-like activity highlighted by an envelop. Using the raster a time region can be selected with a potential SLE, as shown in the below video. This automatically generates the summary measures and a visual of the channels that have a SLE for each group. Individual channels in each group can also be selected to explore the detected envelop.</p>
+<blockquote>
+<div>
+    <video width="600" height="400" controls >
+    <source src="_static/video/03-MEA-Seizure-Functions.mp4" type="video/mp4">
+    Video
+    </video>
+    </div></blockquote>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Installation.html" class="btn btn-neutral float-left" title="Installation, Setup and Running Xenon LFP Analysis GUI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Preprocessing.html" class="btn btn-neutral float-right" title="Additional Pre-processing Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arjun Mahadevan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

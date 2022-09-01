@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Additional Pre-processing Tools &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MIT License" href="License.html" />
+    <link rel="prev" title="Tutorial &amp; Methods" href="Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Xenon Lfp Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation, Setup and Running Xenon LFP Analysis GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial &amp; Methods</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Pre-processing Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-select-channels-to-export">A. Select channels to export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#b-extract-selected-channels-from-brainwave-file-recording">B. Extract selected channels from BrainWave file recording</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">MIT License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Xenon Lfp Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Additional Pre-processing Tools</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Preprocessing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="additional-pre-processing-tools">
+<h1>Additional Pre-processing Tools<a class="headerlink" href="#additional-pre-processing-tools" title="Permalink to this headline"></a></h1>
+<p>Xenon-LFP-Analysis GUI and the code files discussed in the Tutorial sections work with uncompressed-RAW recording, however at times the recording for large duration measurements may be in the BrainWave4 or BrainWave5 proprietary Wavelet Compressed format. This requires the BrainWave4 or BrainWave5 Decompression class and methods. In this section we provide additional support code files to select and export a set of channels from the RAW or Wavelet compressed format to the uncompressed RAW hdf5 file that can be analyzed in the Xenon LFP Analysis GUI. The code files generally work for measurements collected using the BrainWave4 and BrainWave5 software version, both on the RAW and WaveletCompressed files, however will require Python version 3.7 and the BrainWave5 software installed to uncompress the proprietary Wavelet compression data. </p>
+<p>It is a two step process to select, and then extract the channels from the large compressed measurement file. In the first step, a light weight interactive application: <em>Select, Downsample and Export: Channel Selection Toolbox</em> is used to upload the slice image overlay, and select channels that need to be exported, this generates a <em>xx_exportCh</em> hdf5 file. In the second step, the measurement file along with the generated <em>xx_exportCh</em> hdf5 files are placed in a folder and the provided Python script is run to extract and downsample the selected channels. When you have multiple measurements files in the same folder it processess them one at a time.</p>
+<section id="a-select-channels-to-export">
+<h2>A. Select channels to export<a class="headerlink" href="#a-select-channels-to-export" title="Permalink to this headline"></a></h2>
+<p>Download or clone the code-files from GitHub-Repository, run the below command using the full path of the Python code file: <em>ExportToHDF5-ChannelSelection.py</em>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Downloads</span>\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\<span class="mi">3</span><span class="n">Brain</span><span class="o">-</span><span class="n">processing</span>\<span class="n">ExportToHDF5</span><span class="o">-</span><span class="n">ChannelSelection</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Copy and paste <a class="reference external" href="http://127.0.0.1:9090/">http://127.0.0.1:9090/</a> in the browser.</p>
+<ol class="arabic">
+<li><p>Once the Dash application is running it should look as below:</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture1.PNG"><img alt="alternate text" class="align-center" src="_images/Capture1.PNG" style="width: 600px; height: 400px;" /></a>
+</div></blockquote>
+</li>
+</ol>
+<p>2. You will need two inputs, first the full folder path along with the file name for the measurement file (RAW or WaveletCompressed), and second the <em>cropped slice image file</em> to over lay on 4096 channel grid, uploaded using the <em>upload image</em> icon (if you don’t have a slice image you still need to upload a dummy image to get to the next step):</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture2.PNG"><img alt="alternate text" class="align-center" src="_images/Capture2.PNG" style="width: 600px; height: 400px;" /></a>
+</div></blockquote>
+<ol class="arabic" start="3">
+<li><p>You can now use the <em>lasso</em> tool or <em>box tool</em> to select channels to export, you can hold down the <em>shift key</em> to select multiple regions or un-check selected channels.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture3.PNG"><img alt="alternate text" class="align-center" src="_images/Capture3.PNG" style="width: 600px; height: 400px;" /></a>
+</div></blockquote>
+</li>
+<li><p>Once you have selected the channels, you can set the downsampling frequency, or reduce the number of channels in the region using the options provided and click <strong>Export Channels to *.brw File</strong>.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture4.PNG"><img alt="alternate text" class="align-center" src="_images/Capture4.PNG" style="width: 600px; height: 400px;" /></a>
+</div></blockquote>
+</li>
+</ol>
+<p>5. This should generate a <strong>filename_exportCH</strong> hdf5 file in the same folder as the measurement file. You can update the selection or edit settings, the file is overwritten with the latest settings, each time you click <strong>Export Channels to *.brw File</strong>.</p>
+</section>
+<section id="b-extract-selected-channels-from-brainwave-file-recording">
+<h2>B. Extract selected channels from BrainWave file recording<a class="headerlink" href="#b-extract-selected-channels-from-brainwave-file-recording" title="Permalink to this headline"></a></h2>
+<p>As mentioned earlier, to run this step you will first have to follow through on steps in the previous section to generate the <em>xx_exportCh</em> file, have a local Python 3.7 environment with all the dependencies (<strong>pip install xenon-lfp-analysis</strong>), BrainWave5 software installed, and the path for the installation, containing the <em>.dll files</em>.</p>
+<p>1. Open a terminal window, run the the Python code file <em>ExportToHDF5-ExtractDownsample.py</em>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Downloads</span>\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\<span class="mi">3</span><span class="n">Brain</span><span class="o">-</span><span class="n">processing</span>\<span class="n">ExportToHDF5</span><span class="o">-</span><span class="n">ExtractDownsample</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>2. A prompt will come in the <em>Terminal Window</em> for the folder path, make sure the measurement file and the <em>xx_exportCh</em> files are in the same folder. Note that the file names need to be matched as shown in the example below, and if you have multiple pairs of files in the same folder, it will process them one at a time.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture6.PNG"><img alt="alternate text" class="align-center" src="_images/Capture6.PNG" style="width: 300px; height: 50px;" /></a>
+</div></blockquote>
+<p></p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/Capture5.PNG"><img alt="alternate text" class="align-center" src="_images/Capture5.PNG" style="width: 300px; height: 100px;" /></a>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorial &amp; Methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="License.html" class="btn btn-neutral float-right" title="MIT License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arjun Mahadevan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

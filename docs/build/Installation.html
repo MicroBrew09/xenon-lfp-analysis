@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation, Setup and Running Xenon LFP Analysis GUI &mdash; Xenon Lfp Analysis 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial &amp; Methods" href="Tutorial.html" />
+    <link rel="prev" title="Xenon Lfp Analysis Platform" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Xenon Lfp Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation, Setup and Running Xenon LFP Analysis GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-installation">Python Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-using-python-for-windows-environment">Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-using-anaconda-for-windows-and-macos-environment">Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#download-and-run-executable">Download and Run Executable:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#macos">MacOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linux-ubuntu-debian">Linux (Ubuntu/Debian)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#export-channels-for-analysis">Export Channels For Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hd-mea-recording-using-the-3brain-biocam-x-measurement-system">HD-MEA Recording using the 3Brain BioCAM-X Measurement System:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#downsample-exported-channels-for-analysis">Downsample Exported Channels for Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#brainwave4-brw-hdf5-files-3brain-biocam-x-measurement">BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd-mea-recording-using-the-utah-array-measurement-system">HD-MEA Recording using the UTAH Array Measurement System:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-dash-and-xenon-lfp-analysis-platform">Running Dash and Xenon LFP Analysis Platform</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Tutorial &amp; Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Preprocessing.html">Additional Pre-processing Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">MIT License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Xenon Lfp Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation, Setup and Running Xenon LFP Analysis GUI</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation-setup-and-running-xenon-lfp-analysis-gui">
+<h1>Installation, Setup and Running Xenon LFP Analysis GUI<a class="headerlink" href="#installation-setup-and-running-xenon-lfp-analysis-gui" title="Permalink to this headline"></a></h1>
+<p>Xenon LFP Analysis Platform is a Plotly Dash application running on <strong>Python</strong>. </p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
+<ol class="arabic">
+<li><p>Install <strong>Python</strong> and <strong>pip</strong> module if not already installed.</p></li>
+<li><p>Install Xenon Lfp Analysis package</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">pip</span> <span class="n">install</span> <span class="n">xenon_lfp_analysis</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>To start the gui:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">run_lfp_analysis</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>This should open the gui in the browser, you can view the video tutorials to get started.</p></li>
+</ol>
+</section>
+<section id="python-installation">
+<h2>Python Installation<a class="headerlink" href="#python-installation" title="Permalink to this headline"></a></h2>
+<p>The instruction below are for installing Python for <em>Windows</em>. <em>Linux</em> and <em>Mac OS</em> by default have a <strong>Python</strong> installation, you can skip to installing the <strong>Python</strong> libraries from the <em>requirements.txt</em> file.</p>
+<section id="option-1-using-python-for-windows-environment">
+<h3>Option 1: Using <strong>Python</strong> for <strong>Windows</strong> Environment<a class="headerlink" href="#option-1-using-python-for-windows-environment" title="Permalink to this headline"></a></h3>
+<ol class="arabic">
+<li><dl>
+<dt>Download <a class="reference external" href="https://www.python.org/downloads/windows/">Python&gt;3.7x</a></dt><dd><a class="reference internal image-reference" href="_images/installation1.png"><img alt="alternate text" class="align-center" src="_images/installation1.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Run the downloaded installer file, <strong>Do Not</strong> check “Install launcher for all users (recommended)”, may need administrative permissions for all users. This will create a local environment for <strong>Python</strong> under <strong>Windows</strong> user account currently logged-in.</dt><dd><a class="reference internal image-reference" href="_images/installation2.png"><img alt="alternate text" class="align-center" src="_images/installation2.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><p>Install <strong>pip</strong>:</p>
+<blockquote>
+<div><ol class="loweralpha">
+<li><dl>
+<dt>Once the <strong>Python</strong> installation is complete, open the <em>Command Prompt</em>:</dt><dd><a class="reference internal image-reference" href="_images/installation7.png"><img alt="alternate text" class="align-center" src="_images/installation7.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+</ol>
+<p>b. Check the <strong>pip</strong> installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;python -m pip –-version
+</pre></div>
+</div>
+<p>c. If <strong>pip</strong> installation is not found:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">get</span><span class="o">-</span><span class="n">pip</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>4. Install the required <strong>Python</strong> libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">install</span> <span class="s1">&#39;requirements.txt&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="option-2-using-anaconda-for-windows-and-macos-environment">
+<h3>Option 2: Using Anaconda for <strong>Windows</strong> and <strong>MacOS</strong> Environment<a class="headerlink" href="#option-2-using-anaconda-for-windows-and-macos-environment" title="Permalink to this headline"></a></h3>
+<ol class="arabic">
+<li><dl>
+<dt>Download the appropriate <a class="reference external" href="https://www.anaconda.com/products/individual#windows">Anaconda-Version</a></dt><dd><a class="reference internal image-reference" href="_images/installation3.png"><img alt="alternate text" class="align-center" src="_images/installation3.png" style="width: 600px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Run the installer file:</dt><dd><a class="reference internal image-reference" href="_images/installation4.png"><img alt="alternate text" class="align-center" src="_images/installation4.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Select “Just Me (recommended)”” and continue to complete the installation:</dt><dd><a class="reference internal image-reference" href="_images/installation5.png"><img alt="alternate text" class="align-center" src="_images/installation5.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Select and open “Anaconda Prompt” from the <em>Windows</em> ‘Start’ Menu:</dt><dd><a class="reference internal image-reference" href="_images/installation6.png"><img alt="alternate text" class="align-center" src="_images/installation6.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+</ol>
+<p>5.      Install the required <strong>Python</strong> libraries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s1">&#39;requirements.txt&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="download-and-run-executable">
+<h2>Download and Run Executable:<a class="headerlink" href="#download-and-run-executable" title="Permalink to this headline"></a></h2>
+<p>While Dash applications can be deployed on a server and run remotely, it does not work well in this case, particularly on the .brw and large HDF5 files. The HDF5 files are not suitable for multiple parallel reads, or loading and transmitting data over a network, it is quite challenging to load and transmit large chunks of the HDF5 files back and forth between the remote server and local storage.
+In this case we have found it inefficient, sometimes the file does not load, when the application is deployed on a remote server. For efficient analysis, the Dash application needs to run on the local machine and accessed through local host using the <em>pip installation package</em>, or the executable file as below,it is also recommended that data files are present in the local hard-drive.</p>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
+<ol class="loweralpha simple">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1ty1AqxGgfzMHZUJbBtptYpODZF6GU6O5/view?usp=sharing">Xenon-LFP-Analysis-Windows</a></p></li>
+<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application:</p></li>
+</ol>
+</section>
+<section id="macos">
+<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline"></a></h3>
+<ol class="loweralpha">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1SqnkbsohdFKKajLGweQUE1bKjUqkSvci/view?usp=sharing">Xenon-LFP-Analysis-MacOS</a></p></li>
+<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
+<li><p>Run the following command to change/confirm it is a Unix Executable.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Now you can double click on the file to run the application.</p>
+<blockquote>
+<div><p>If you get a security warning, click on the Apple logo -&gt; System Preferences -&gt; Security &amp; Privacy. At the bottom of the window, press ‘Allow’ to allow the file to run.</p>
+</div></blockquote>
+</li>
+</ol>
+<ol class="loweralpha simple" start="4">
+<li><p>Copy and Paste the url (<a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a>) in any browser to run the application</p></li>
+</ol>
+</section>
+<section id="linux-ubuntu-debian">
+<h3>Linux (Ubuntu/Debian)<a class="headerlink" href="#linux-ubuntu-debian" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Download the application <a class="reference external" href="https://drive.google.com/file/d/1zy7M5yFTEWcW0ZY8J8Qn0L7WT-tdWHfE/view?usp=sharing">Xenon-LFP-Analysis-Ubuntu</a></p></li>
+<li><p>Open a new terminal window, cd into the downloaded file location.</p></li>
+<li><p>Run the following command to change/confirm it is a Linux Executable.</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ chmod u+x Xenon-LFP-Analysis-ubuntu
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="4">
+<li><p>Run the application</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$./Xenon-LFP-Analysis
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="4">
+<li><p>Copy and Paste the url <a class="reference external" href="http://127.0.0.1:7080">http://127.0.0.1:7080</a> in any browser.</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
+<section id="export-channels-for-analysis">
+<h2>Export Channels For Analysis<a class="headerlink" href="#export-channels-for-analysis" title="Permalink to this headline"></a></h2>
+<p>The full recording from the HD MEA platform can range from 80 GB to 250GB uncompressed and will not fit in the systems local memory (RAM) for analysis. The Dash application can only work within the capacity of the local memory, with the raw uncompressed data, for this we export a subset of channels that are of interest and downsample the traces to less than 2048 Hz sampling frequency. This gives us a  frequency range of upto 1024 Hz (2048/2 Nyquist Frequency), also the maximum sampling frequency is not limited by the processing capability of the application, but limited to rendering inteactive scatter plots with a large number of data points in the browser. For example the application can work with two or three traces of sampled at 10000 Hz, or about 200 traces at 2048 Hz or 600 to 1000 traces at a sampling frequency of 300 Hz.</p>
+<section id="hd-mea-recording-using-the-3brain-biocam-x-measurement-system">
+<h3>HD-MEA Recording using the 3Brain BioCAM-X Measurement System:<a class="headerlink" href="#hd-mea-recording-using-the-3brain-biocam-x-measurement-system" title="Permalink to this headline"></a></h3>
+<p>This example below is illustrated for the BrainWave4 Software, other aquisition systems may have a different process.</p>
+<ol class="arabic">
+<li><dl>
+<dt>Open BrainWave4 Software application:</dt><dd><a class="reference internal image-reference" href="_images/installation8.png"><img alt="alternate text" class="align-center" src="_images/installation8.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Open the compressed or uncompressed <strong>.brw</strong> <em>HDF5</em> recording file in the application:</dt><dd><a class="reference internal image-reference" href="_images/installation9.png"><img alt="alternate text" class="align-center" src="_images/installation9.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Export a group of channel: <strong>File-&gt; Export-&gt; Raw Data</strong> or <strong>Ctr + E</strong>, and select the subset of channels of interest, give it a file name and <strong>Export</strong>.</dt><dd><a class="reference internal image-reference" href="_images/installation10.png"><img alt="alternate text" class="align-center" src="_images/installation10.png" style="width: 300px; height: 200px;" /></a>
+</dd>
+</dl>
+</li>
+</ol>
+</section>
+</section>
+<section id="downsample-exported-channels-for-analysis">
+<h2>Downsample Exported Channels for Analysis<a class="headerlink" href="#downsample-exported-channels-for-analysis" title="Permalink to this headline"></a></h2>
+<section id="brainwave4-brw-hdf5-files-3brain-biocam-x-measurement">
+<h3>BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):<a class="headerlink" href="#brainwave4-brw-hdf5-files-3brain-biocam-x-measurement" title="Permalink to this headline"></a></h3>
+<p>The current example is illustrated to work with the 3Brain BioCAM-X recording using the BrainWave4 Software. The code is provided in the <a class="reference external" href="https://github.com/MicroBrew09/xenon-lfp-analysis.git">GitHub Repository:</a></p>
+<p>1.      Open Windows Command Prompt (cmd) if you are using Python base installation, or Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/installation11.png"><img alt="alternate text" class="align-center" src="_images/installation11.png" style="width: 800px; height: 300px;" /></a>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>If you have the the <strong>xenon_lfp_analysis</strong> package installed you can run the following to downsample <em>*.brw file</em></p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">downsample_brw</span>
+</pre></div>
+</div>
+<p>or</p>
+<p>2. Download or clone the code-files from GitHub-Repository, run the below command using the full path of the code file HD-MEA-DownSample.py.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">HD</span><span class="o">-</span><span class="n">MEA</span><span class="o">-</span><span class="n">DownSample</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> \\<span class="n">file</span><span class="o">-</span><span class="n">path</span>\\<span class="n">Slice1_raw</span><span class="o">.</span><span class="n">brw</span> <span class="p">:</span><span class="nb">str</span> <span class="o">-</span><span class="n">ns</span> <span class="n">SamplingFrequency</span><span class="p">:</span> <span class="nb">int</span> <span class="o">-</span><span class="n">bs</span> <span class="n">blocksize</span><span class="p">:</span> <span class="n">default</span> <span class="mi">100000</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">HD</span><span class="o">-</span><span class="n">MEA</span><span class="o">-</span><span class="n">DownSample</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</section>
+<section id="hd-mea-recording-using-the-utah-array-measurement-system">
+<h3>HD-MEA Recording using the UTAH Array Measurement System:<a class="headerlink" href="#hd-mea-recording-using-the-utah-array-measurement-system" title="Permalink to this headline"></a></h3>
+<p>A sample Utah-Array (BlackRock Microsystems) recording is provided in the <a class="reference external" href="https://www.dropbox.com/s/5a9ufj09nzpehjm/Iqseq_id520_007.ns5?dl=0">*.ns5 format</a> , a <a class="reference external" href="https://github.com/MicroBrew09/xenon-lfp-analysis.git">code file</a> is provided to extract the data and downsample to a lower frequency for analysis with the Xenon-LFP-Analysis platform.</p>
+<p>1. Open Windows Command Prompt (cmd) if you are using Python base installation, or Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.</p>
+<p>2. Download or clone the code-files from GitHub-repository, run the below command using the full path of the code file utah-array-conversion.py. You can either use the <em>-f</em> and <em>-ns</em> tags to provide the file name and new sampling frequency in Hz, or when promted enter the full file path for the <em>.ns5</em> file, and enter the desired sampling frequency.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">utah</span><span class="o">-</span><span class="n">array</span><span class="o">-</span><span class="n">conversion</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> \\<span class="n">file</span><span class="o">-</span><span class="n">path</span>\\<span class="n">Slice1</span><span class="o">.</span><span class="n">ns5</span> <span class="p">:</span><span class="nb">str</span> <span class="o">-</span><span class="n">ns</span> <span class="n">SamplingFrequency</span><span class="p">:</span> <span class="nb">int</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">utah</span><span class="o">-</span><span class="n">array</span><span class="o">-</span><span class="n">conversion</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>3. The <a class="reference external" href="https://drive.google.com/file/d/1Ao1xW8prK4MasGJazjKWqtPbCJniIjBH/view?usp=sharing">downsampled file</a> can be now be run on the Xenon-LFP-Analysis platform.The code may need a few modifications for larger recordings, the provided example is only a sample and may vary by use case, feel free to email or contact us if you run into issues.</p>
+</section>
+</section>
+<section id="running-dash-and-xenon-lfp-analysis-platform">
+<h2>Running Dash and Xenon LFP Analysis Platform<a class="headerlink" href="#running-dash-and-xenon-lfp-analysis-platform" title="Permalink to this headline"></a></h2>
+<section id="id1">
+<h3>BrainWave4 .brw HDF5 Files (3Brain - BioCAM-X Measurement):<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>The current example is illustrated to work with the 3Brain BioCAM-X recording using the BrainWave4 Software. The code is provided in the <a class="reference external" href="https://github.com/MicroBrew09/xenon-lfp-analysis.git">GitHub Repository:</a></p>
+<p>1.      Open Windows Command Prompt (cmd) if you are using Python base installation, or Open Anaconda Command Prompt (anaconda) if you are working with Anaconda.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/installation11.png"><img alt="alternate text" class="align-center" src="_images/installation11.png" style="width: 800px; height: 300px;" /></a>
+</div></blockquote>
+<p>2. Download or clone the code-files from GitHub-Repository, run the below command using the full path of the code file HD-MEA-DownSample.py.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">C</span><span class="p">:</span>\\<span class="n">Downloads</span>\\<span class="n">xenon</span><span class="o">-</span><span class="n">lfp</span><span class="o">-</span><span class="n">analysis</span>\\<span class="n">code</span><span class="o">-</span><span class="n">files</span>\\<span class="n">Xenon</span><span class="o">-</span><span class="n">LFP</span><span class="o">-</span><span class="n">Analysis</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/installation12.png"><img alt="alternate text" class="align-center" src="_images/installation12.png" style="width: 500px; height: 100px;" /></a>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Copy and paste <a class="reference external" href="http://127.0.0.1:8050/">http://127.0.0.1:8050/</a> in the browser (Firefox or Chrome).</p></li>
+</ol>
+<p>Repeat steps 1 to 3 if the program crashes or you want to restart analysis.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Xenon Lfp Analysis Platform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tutorial.html" class="btn btn-neutral float-right" title="Tutorial &amp; Methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arjun Mahadevan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
